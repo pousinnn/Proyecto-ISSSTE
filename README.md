@@ -1,4 +1,4 @@
-# Proyecto-ISSTE
+# Proyecto-ISSSTE
 Proyecto para integración de seguridad informática en redes y sistemas de software:
 
 Nicolas Casillas Larrañaga | A01787292 
