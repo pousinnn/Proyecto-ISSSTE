@@ -7,3 +7,10 @@ Paulina Cortez Balvanera | A01782041
 
 María Espínola Forcén | A01787172
 
+## Profesores
+
+- Ahmed Imad Hammoodi AL-Jarah
+- Edith Carolina Arias Serna
+- Lizbeth Peralta Malváez
+- Carlos Enrique Vega Álvarez
+- Jorge Rodríguez Ruiz
