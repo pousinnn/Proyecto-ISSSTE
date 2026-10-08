@@ -14,3 +14,5 @@ María Espínola Forcén | A01787172
 - Lizbeth Peralta Malváez
 - Carlos Enrique Vega Álvarez
 - Jorge Rodríguez Ruiz
+
+Inicio de proyecto: 07/10/2026
