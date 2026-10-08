@@ -1,10 +1,7 @@
+import AdminApp from "./admin";
+
 function App() {
-    return (
-        <div>
-            <h1>Proyecto ISSTE</h1>
-            <p>Mi proyecto de React funciona.</p>
-        </div>
-    );
+    return <AdminApp />;
 }
 
 export default App;

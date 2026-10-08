@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/pousinnn/Proyecto-ISSTE#readme",
   "dependencies": {
+    "ra-data-json-server": "^5.15.4",
     "react": "^19.3.0",
+    "react-admin": "^5.15.4",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
