@@ -4,7 +4,12 @@ import { AuthProvider } from "react-admin";
 export const authProvider: AuthProvider = {
     // called when the user attempts to log in
     async login({ username, password }) {
-        if(username !== "A01787292" ||username !== "A01782041" ||username !== "A01787172" || password !== "123"){
+        const validUsernames = [
+            "A01787292",
+            "A01782041",
+            "A01787172",
+        ];
+        if(!validUsernames.includes(username) || password !== "123"){
             throw new Error('Login failed');
         }
         // accept all username/password combinations
