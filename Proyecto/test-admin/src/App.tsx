@@ -11,7 +11,8 @@ import MyLoginPage from './MyLoginPage';
 import MyLayout from './MyLayout';
 
 //RESULTADOS
-import {ResultadosList, ResultadosEdit, ResultadosCreate} from "./resultados";
+import { Resultados } from "./resultados/Resultados";
+import { Assessment } from "@mui/icons-material";
 
 //PESO Y TALLA
 import { MonitorWeight } from "@mui/icons-material";
@@ -49,7 +50,7 @@ export const App = () =>(
     dashboard={Dashboard}
     i18nProvider={i18nProvider}>
         //RESULTADOS
-        <Resource name="resultados" list={ResultadosList} edit={ResultadosEdit} create={ResultadosCreate} icon={PostIcon}/>
+        <Resource name="resultados" list={Resultados} icon={Assessment} options={{ label: "Resultados" }} />
 
         //PESO Y TALLA
         <Resource name="pesoytalla" list={PesoYTalla} icon={MonitorWeight} options={{ label: "Peso y Talla" }} />
