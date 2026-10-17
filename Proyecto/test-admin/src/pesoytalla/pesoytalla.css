@@ -1,96 +1,93 @@
 
 .peso-page {
   min-height: 100vh;
-  background-color: #303030;
   padding: 30px;
 }
 
 .peso-card {
   max-width: 900px;
   margin: 0 auto;
-  background-color: #424242 !important;
-  color: white !important;
   border-radius: 14px !important;
   padding: 15px;
 }
+
+/* Encabezado */
 
 .peso-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
 }
 
 .peso-title {
-  color: #f48ad7;
+  color: #e879c8;
   font-weight: bold !important;
   letter-spacing: 1px;
 }
 
 .peso-subtitle {
-  background-color: #666;
   padding: 5px 15px;
   margin-top: 8px !important;
   border-radius: 6px;
   letter-spacing: 3px;
-  color: #eee;
 }
 
 .peso-mascota {
   width: 75px;
   height: 75px;
-  background-color: #252525;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  flex-shrink: 0;
 }
 
-.section-title {
-  background-color: #666;
-  color: #ddd;
-  padding: 8px;
+/* Secciones */
+
+.peso-section {
+  padding: 8px 12px;
   border-radius: 6px;
-  margin-bottom: 15px !important;
+  margin-bottom: 12px !important;
+  font-weight: 500 !important;
 }
 
-.field-label {
-  color: #e9ff75;
+.peso-label {
   font-weight: bold !important;
   margin-bottom: 8px !important;
   font-size: 17px !important;
 }
 
+/* Campos */
+
+.peso-measure-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
 .peso-card .MuiInputBase-root {
-  background-color: #666;
-  color: white;
   border-radius: 6px;
 }
 
-.peso-card .MuiInputBase-input {
-  color: white;
-}
-
-.peso-card .MuiInputBase-input::placeholder {
-  color: #c3d9ec;
-  opacity: 1;
-}
-
-.peso-card .MuiSvgIcon-root {
-  color: #e9ff75;
-}
+/* Selección de sexo */
 
 .peso-card .MuiToggleButton-root {
-  color: #e9ff75;
-  background-color: #666;
-  font-size: 16px;
   font-weight: bold;
+  text-transform: none;
 }
 
 .peso-card .MuiToggleButton-root.Mui-selected {
-  background-color: #85994b;
-  color: white;
+  background-color: #9caf32;
+  color: #ffffff;
 }
+
+.peso-card .MuiToggleButton-root.Mui-selected:hover {
+  background-color: #83952b;
+}
+
+/* Botones */
 
 .peso-actions {
   display: flex;
@@ -99,15 +96,17 @@
   margin-top: 30px;
 }
 
-.guardar-btn {
+.peso-guardar {
   background-color: #9bc94b !important;
-  color: white !important;
+  color: #ffffff !important;
   font-weight: bold !important;
 }
 
-.guardar-btn:hover {
+.peso-guardar:hover {
   background-color: #7ca533 !important;
 }
+
+/* Responsive */
 
 @media (max-width: 600px) {
   .peso-page {
@@ -119,7 +118,16 @@
   }
 
   .peso-title {
-    font-size: 23px !important;
+    font-size: 22px !important;
+  }
+
+  .peso-mascota {
+    width: 55px;
+    height: 55px;
+  }
+
+  .peso-measure-row {
+    gap: 6px;
   }
 
   .peso-actions {

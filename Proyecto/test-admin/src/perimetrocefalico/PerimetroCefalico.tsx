@@ -28,6 +28,7 @@ import {
   Title,
   useNotify,
   useCreate,
+  useTranslate,
 } from "react-admin";
 
 import "./PerimetroCefalico.css";
@@ -38,9 +39,14 @@ export const PerimetroCefalico = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
+  // Traducciones
+  const translate = useTranslate();
+  const t = (key: string) => translate(`custom.${key}`);
+
   const notify = useNotify();
   const [create, { isPending }] = useCreate();
 
+  // Estados
   const [sexo, setSexo] = useState<Sexo>("niño");
   const [periodo, setPeriodo] = useState("");
   const [zona, setZona] = useState("");
@@ -50,7 +56,7 @@ export const PerimetroCefalico = () => {
 
   const [resultado, setResultado] = useState<number | null>(null);
 
-  // Convertir la medida a centímetros
+  // Convertir medida a centímetros
   const convertirACm = (
     valor: number,
     unidadMedida: string
@@ -67,7 +73,8 @@ export const PerimetroCefalico = () => {
     }
   };
 
-  const calcular = () => {
+  // Validar medida
+  const obtenerMedida = (): number | null => {
     const valor = Number(cantidad);
 
     if (
@@ -75,51 +82,48 @@ export const PerimetroCefalico = () => {
       !Number.isFinite(valor) ||
       valor <= 0
     ) {
-      notify("Ingresa una medida válida", {
+      notify(t("notifications.invalidMeasurement"), {
         type: "warning",
       });
-      return;
+      return null;
     }
 
-    const medidaCm = convertirACm(valor, unidad);
+    return Number(
+      convertirACm(valor, unidad).toFixed(2)
+    );
+  };
 
-    setResultado(Number(medidaCm.toFixed(2)));
+  // Convertir
+  const calcular = () => {
+    const medidaCm = obtenerMedida();
 
-    notify("Medida calculada correctamente", {
+    if (medidaCm === null) return;
+
+    setResultado(medidaCm);
+
+    notify(t("notifications.calculated"), {
       type: "success",
     });
   };
 
+  // Guardar registro
   const guardar = () => {
     if (!periodo || !zona.trim()) {
-      notify("Completa el periodo y la zona", {
+      notify(t("notifications.required"), {
         type: "warning",
       });
       return;
     }
 
-    const valor = Number(cantidad);
+    const medidaCm = obtenerMedida();
 
-    if (
-      cantidad.trim() === "" ||
-      !Number.isFinite(valor) ||
-      valor <= 0
-    ) {
-      notify("Ingresa una medida válida", {
-        type: "warning",
-      });
-      return;
-    }
-
-    const medidaCm = Number(
-      convertirACm(valor, unidad).toFixed(2)
-    );
+    if (medidaCm === null) return;
 
     const registro = {
       sexo,
       periodo,
       zona,
-      perimetro: valor,
+      perimetro: Number(cantidad),
       unidad,
       perimetroCm: medidaCm,
     };
@@ -131,17 +135,32 @@ export const PerimetroCefalico = () => {
         onSuccess: () => {
           setResultado(medidaCm);
 
-          notify("Registro guardado correctamente", {
+          notify(t("notifications.saved"), {
             type: "success",
           });
         },
         onError: () => {
-          notify("Error al guardar el registro", {
+          notify(t("notifications.error"), {
             type: "error",
           });
         },
       }
     );
+  };
+
+  // Colores dinámicos según el tema
+  const labelColor = isDark ? "#e9ff75" : "#748c1f";
+
+  const inputStyle = {
+    "& .MuiInputBase-root": {
+      bgcolor: "action.hover",
+      color: "text.primary",
+      borderRadius: 1.5,
+    },
+    "& .MuiInputBase-input::placeholder": {
+      color: "text.secondary",
+      opacity: 1,
+    },
   };
 
   return (
@@ -152,7 +171,7 @@ export const PerimetroCefalico = () => {
         color: "text.primary",
       }}
     >
-      <Title title="Calculadora Perímetro Cefálico" />
+      <Title title={t("perimetrocefalico.title")} />
 
       <Card
         className="perimetro-card"
@@ -170,7 +189,7 @@ export const PerimetroCefalico = () => {
                 variant="h4"
                 className="perimetro-title"
               >
-                Calculadora perímetro cefálico
+                {t("perimetrocefalico.title")}
               </Typography>
 
               <Typography
@@ -188,6 +207,7 @@ export const PerimetroCefalico = () => {
               className="perimetro-mascota"
               sx={{
                 bgcolor: "action.hover",
+                color: "text.primary",
               }}
             >
               <ChildCare sx={{ fontSize: 45 }} />
@@ -205,36 +225,30 @@ export const PerimetroCefalico = () => {
                   color: "text.primary",
                 }}
               >
-                Instrucciones
+                {t("common.instructions")}
               </Typography>
 
               <Typography
                 variant="body2"
                 sx={{ mb: 2 }}
               >
-                Selecciona el sexo del niño o niña
-                e ingresa la medida del perímetro
-                cefálico para registrar el resultado.
+                {t("perimetrocefalico.description")}
               </Typography>
 
               {/* SEXO */}
 
               <Typography
                 className="perimetro-label"
-                sx={{
-                  color: isDark
-                    ? "#e9ff75"
-                    : "#748c1f",
-                }}
+                sx={{ color: labelColor }}
               >
-                ⚥ Sexo
+                ⚥ {t("common.sex")}
               </Typography>
 
               <ToggleButtonGroup
                 value={sexo}
                 exclusive
                 fullWidth
-                onChange={(_, value) => {
+                onChange={(_, value: Sexo | null) => {
                   if (value !== null) {
                     setSexo(value);
                     setResultado(null);
@@ -243,7 +257,7 @@ export const PerimetroCefalico = () => {
                 sx={{ mb: 3 }}
               >
                 <ToggleButton value="niño">
-                  Niño
+                  {t("common.boy")}
                   <Male
                     sx={{
                       ml: 1,
@@ -253,7 +267,7 @@ export const PerimetroCefalico = () => {
                 </ToggleButton>
 
                 <ToggleButton value="niña">
-                  Niña
+                  {t("common.girl")}
                   <Female
                     sx={{
                       ml: 1,
@@ -267,37 +281,38 @@ export const PerimetroCefalico = () => {
 
               <Typography
                 className="perimetro-label"
-                sx={{
-                  color: isDark
-                    ? "#e9ff75"
-                    : "#748c1f",
-                }}
+                sx={{ color: labelColor }}
               >
-                ☆ Perímetro
+                ☆ {t("perimetrocefalico.perimeter")}
               </Typography>
 
               <Box className="perimetro-measure-row">
                 <TextField
                   select
-                  label="Unidad"
+                  label={t("common.unit")}
                   value={unidad}
                   onChange={(e) => {
                     setUnidad(e.target.value);
                     setResultado(null);
                   }}
-                  sx={{ minWidth: 115 }}
+                  sx={{
+                    ...inputStyle,
+                    minWidth: 115,
+                  }}
                   size="small"
                 >
                   <MenuItem value="cm">cm</MenuItem>
                   <MenuItem value="mm">mm</MenuItem>
                   <MenuItem value="m">m</MenuItem>
-                  <MenuItem value="in">pulgadas</MenuItem>
+                  <MenuItem value="in">
+                    {t("perimetrocefalico.inches")}
+                  </MenuItem>
                 </TextField>
 
                 <TextField
                   type="number"
-                  label="Cantidad"
-                  placeholder="Ej. 45.5"
+                  label={t("common.quantity")}
+                  placeholder="45.5"
                   value={cantidad}
                   onChange={(e) => {
                     setCantidad(e.target.value);
@@ -305,6 +320,7 @@ export const PerimetroCefalico = () => {
                   }}
                   size="small"
                   fullWidth
+                  sx={inputStyle}
                   slotProps={{
                     htmlInput: {
                       min: 0,
@@ -318,6 +334,8 @@ export const PerimetroCefalico = () => {
             {/* COLUMNA DERECHA */}
 
             <Grid size={{ xs: 12, md: 5 }}>
+              {/* PERIODO */}
+
               <Typography
                 className="perimetro-section"
                 sx={{
@@ -325,7 +343,7 @@ export const PerimetroCefalico = () => {
                   color: "text.primary",
                 }}
               >
-                Periodo
+                {t("common.period")}
               </Typography>
 
               <TextField
@@ -336,7 +354,7 @@ export const PerimetroCefalico = () => {
                 onChange={(e) =>
                   setPeriodo(e.target.value)
                 }
-                sx={{ mb: 3 }}
+                sx={{ ...inputStyle, mb: 3 }}
               >
                 <MenuItem value="2026-1">
                   2026-1
@@ -349,6 +367,8 @@ export const PerimetroCefalico = () => {
                 </MenuItem>
               </TextField>
 
+              {/* ZONA */}
+
               <Typography
                 className="perimetro-section"
                 sx={{
@@ -356,17 +376,18 @@ export const PerimetroCefalico = () => {
                   color: "text.primary",
                 }}
               >
-                EBDI / Zona
+                {t("common.zone")}
               </Typography>
 
               <TextField
                 fullWidth
                 size="small"
-                placeholder="Ingresa la zona"
+                placeholder={t("common.zone")}
                 value={zona}
                 onChange={(e) =>
                   setZona(e.target.value)
                 }
+                sx={inputStyle}
               />
             </Grid>
           </Grid>
@@ -379,8 +400,8 @@ export const PerimetroCefalico = () => {
               sx={{ mt: 3 }}
             >
               <Typography fontWeight="bold">
-                Perímetro cefálico:
-                {" "}{resultado.toFixed(2)} cm
+                {t("perimetrocefalico.result")}:{" "}
+                {resultado.toFixed(2)} cm
               </Typography>
             </Alert>
           )}
@@ -392,7 +413,7 @@ export const PerimetroCefalico = () => {
               variant="outlined"
               onClick={calcular}
             >
-              Convertir
+              {t("common.convert")}
             </Button>
 
             <Button
@@ -402,7 +423,7 @@ export const PerimetroCefalico = () => {
               disabled={isPending}
               className="perimetro-guardar"
             >
-              Guardar
+              {t("common.save")}
             </Button>
           </Box>
         </CardContent>

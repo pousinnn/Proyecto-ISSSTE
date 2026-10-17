@@ -372,7 +372,88 @@ const englishMessages: TranslationMessages = {
                 completed: "Completed",
             },
         },
+        resultados: {
+            name: "Results",
+        },
+        pesoytalla: {
+            name: "Weight and Height",
+        },
+        tallablanca: {
+            name: "White Height",
+        },
+        perimetrocefalico: {
+            name: "Head Circumference",
+        },
     },
+    custom: {
+    resources: {
+      resultados: "Results",
+      pesoytalla: "Weight and Height",
+      tallablanca: "White Height",
+      perimetrocefalico: "Head Circumference",
+    },
+
+    common: {
+      instructions: "Instructions",
+      sex: "Sex",
+      boy: "Boy",
+      girl: "Girl",
+      period: "Period",
+      zone: "EBDI / Zone",
+      unit: "Unit",
+      quantity: "Quantity",
+      save: "Save",
+      calculate: "Calculate",
+      convert: "Convert",
+      search: "Search",
+    },
+
+    pesoytalla: {
+      title: "Weight & Height Calculator",
+      birthdate: "Date of Birth",
+      height: "Height",
+      weight: "Weight",
+      age: "Age",
+      bmi: "BMI",
+      description:
+        "Select the sex and date of birth, then enter the weight and height.",
+    },
+
+    tallablanca: {
+      title: "White Height Calculator",
+      fatherHeight: "Father's Height",
+      motherHeight: "Mother's Height",
+      result: "Mid-Parental White Height",
+      description:
+        "Enter the father's and mother's heights.",
+    },
+
+    perimetrocefalico: {
+      title: "Head Circumference Calculator",
+      perimeter: "Circumference",
+      result: "Head Circumference",
+      description:
+        "Select the sex and enter the head circumference.",
+    },
+
+    resultados: {
+      title: "Results",
+      history: "History",
+      nutritionHistory: "Nutrition History",
+      name: "Name",
+      titleColumn: "Title",
+      content: "Content",
+      date: "Date",
+    },
+
+    notifications: {
+      saved: "Record saved successfully",
+      error: "Error saving the record",
+      required: "Complete the required fields",
+      calculated: "Calculation completed successfully",
+      invalidMeasurement: "Enter a valid measurement",
+    },
+  },
 };
 
 export default englishMessages;

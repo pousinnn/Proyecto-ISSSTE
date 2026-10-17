@@ -1,8 +1,8 @@
-import { useTheme } from "@mui/material/styles";
+
 import { useState } from "react";
+
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Typography,
@@ -10,29 +10,48 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   MenuItem,
+  Button,
   Grid,
-  Divider,
   Alert,
 } from "@mui/material";
 
+import { useTheme } from "@mui/material/styles";
+
 import {
-  ChildCare,
-  Female,
   Male,
+  Female,
+  ChildCare,
   Save,
   Calculate,
 } from "@mui/icons-material";
 
-import { Title, useNotify } from "react-admin";
+import {
+  Title,
+  useNotify,
+  useCreate,
+  useTranslate,
+} from "react-admin";
+
 import "./pesoytalla.css";
 
 type Sexo = "niño" | "niña";
 
+type Resultado = {
+  edad: string;
+  imc: number;
+};
+
 export const PesoYTalla = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const notify = useNotify();
 
+  // Traducciones de React Admin
+  const translate = useTranslate();
+
+  const notify = useNotify();
+  const [create, { isPending }] = useCreate();
+
+  // Estados
   const [sexo, setSexo] = useState<Sexo>("niño");
   const [fechaNacimiento, setFechaNacimiento] = useState("");
   const [periodo, setPeriodo] = useState("");
@@ -44,14 +63,13 @@ export const PesoYTalla = () => {
   const [peso, setPeso] = useState("");
   const [unidadPeso, setUnidadPeso] = useState("kg");
 
-  const [resultado, setResultado] = useState<{
-    edad: string;
-    imc: string;
-  } | null>(null);
+  const [resultado, setResultado] = useState<Resultado | null>(null);
 
+  // Traducción corta para reutilizar en JSX
+  const t = (key: string) => translate(`custom.${key}`);
+
+  // Calcular edad
   const calcularEdad = (fecha: string): string => {
-    if (!fecha) return "";
-
     const nacimiento = new Date(fecha + "T00:00:00");
     const hoy = new Date();
 
@@ -70,31 +88,38 @@ export const PesoYTalla = () => {
     return `${años} años y ${meses} meses`;
   };
 
-  const calcular = () => {
-    if (!fechaNacimiento || !altura || !peso) {
-      notify("Completa los campos obligatorios", {
+  // Validar y convertir medidas
+  const obtenerMedidas = () => {
+    const nacimiento = new Date(
+      fechaNacimiento + "T00:00:00"
+    );
+
+    if (
+      !fechaNacimiento ||
+      Number.isNaN(nacimiento.getTime()) ||
+      nacimiento > new Date()
+    ) {
+      notify(t("notifications.invalidDate"), {
         type: "warning",
       });
-      return;
-    }
-
-    const nacimiento = new Date(fechaNacimiento + "T00:00:00");
-
-    if (nacimiento > new Date()) {
-      notify("La fecha de nacimiento no puede ser futura", {
-        type: "warning",
-      });
-      return;
+      return null;
     }
 
     const alturaNumero = Number(altura);
     const pesoNumero = Number(peso);
 
-    if (alturaNumero <= 0 || pesoNumero <= 0) {
-      notify("La altura y el peso deben ser positivos", {
+    if (
+      altura.trim() === "" ||
+      peso.trim() === "" ||
+      !Number.isFinite(alturaNumero) ||
+      !Number.isFinite(pesoNumero) ||
+      alturaNumero <= 0 ||
+      pesoNumero <= 0
+    ) {
+      notify(t("notifications.invalidMeasurement"), {
         type: "warning",
       });
-      return;
+      return null;
     }
 
     const alturaMetros =
@@ -107,23 +132,45 @@ export const PesoYTalla = () => {
         ? pesoNumero * 0.45359237
         : pesoNumero;
 
-    const imc = pesoKg / (alturaMetros * alturaMetros);
+    const imc = pesoKg / (alturaMetros ** 2);
+
+    return {
+      edad: calcularEdad(fechaNacimiento),
+      imc: Number(imc.toFixed(2)),
+      alturaCm: Number((alturaMetros * 100).toFixed(2)),
+      pesoKg: Number(pesoKg.toFixed(2)),
+    };
+  };
+
+  // Calcular IMC
+  const calcular = () => {
+    const datos = obtenerMedidas();
+
+    if (!datos) return;
 
     setResultado({
-      edad: calcularEdad(fechaNacimiento),
-      imc: imc.toFixed(2),
+      edad: datos.edad,
+      imc: datos.imc,
+    });
+
+    notify(t("notifications.calculated"), {
+      type: "success",
     });
   };
 
+  // Guardar registro
   const guardar = () => {
-    if (!resultado) {
-      notify("Primero calcula los resultados", {
+    if (!periodo || !zona.trim()) {
+      notify(t("notifications.required"), {
         type: "warning",
       });
       return;
     }
 
-    // Aquí puedes conectar tu dataProvider
+    const datos = obtenerMedidas();
+
+    if (!datos) return;
+
     const registro = {
       sexo,
       fechaNacimiento,
@@ -133,147 +180,275 @@ export const PesoYTalla = () => {
       unidadAltura,
       peso: Number(peso),
       unidadPeso,
-      ...resultado,
+      ...datos,
     };
 
-    console.log("Registro:", registro);
+    create(
+      "pesoytalla",
+      { data: registro },
+      {
+        onSuccess: () => {
+          setResultado({
+            edad: datos.edad,
+            imc: datos.imc,
+          });
 
-    notify("Datos preparados correctamente", {
-      type: "success",
-    });
+          notify(t("notifications.saved"), {
+            type: "success",
+          });
+        },
+        onError: () => {
+          notify(t("notifications.error"), {
+            type: "error",
+          });
+        },
+      }
+    );
+  };
+
+  // Colores dinámicos
+  const labelColor = isDark ? "#e9ff75" : "#748c1f";
+
+  const inputStyle = {
+    "& .MuiInputBase-root": {
+      bgcolor: "action.hover",
+      color: "text.primary",
+      borderRadius: 1.5,
+    },
+    "& .MuiInputBase-input::placeholder": {
+      color: "text.secondary",
+      opacity: 1,
+    },
   };
 
   return (
-    <Box className="peso-page" sx={{
-      backgroundColor: "background.default",
-      color: "text.primary",
-      minHeight: "100vh",
-      p: 3,
-    }}>
-      <Title title="Calculadora Peso & Talla" />
-
-      <Card className="peso-card" sx={{
-        backgroundColor: "background.paper",
+    <Box
+      className="peso-page"
+      sx={{
+        bgcolor: "background.default",
         color: "text.primary",
-        borderRadius: 3,
-        p: 2,
-      }}>
+      }}
+    >
+      <Title title={t("pesoytalla.title")} />
+
+      <Card
+        className="peso-card"
+        sx={{
+          bgcolor: "background.paper",
+          color: "text.primary",
+        }}
+      >
         <CardContent>
+          {/* ENCABEZADO */}
+
           <Box className="peso-header">
-            <Box>
-              <Typography variant="h4" className="peso-title">
-                Calculadora Peso & Talla
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="h4"
+                className="peso-title"
+              >
+                {t("pesoytalla.title")}
               </Typography>
 
-              <Typography className="peso-subtitle">
+              <Typography
+                className="peso-subtitle"
+                sx={{
+                  bgcolor: "action.hover",
+                  color: "text.primary",
+                }}
+              >
                 014121305
               </Typography>
             </Box>
 
-            <Box className="peso-mascota">
+            <Box
+              className="peso-mascota"
+              sx={{
+                bgcolor: "action.hover",
+                color: "text.primary",
+              }}
+            >
               <ChildCare sx={{ fontSize: 45 }} />
             </Box>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            {/* COLUMNA IZQUIERDA */}
 
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography className="section-title">
-                Instrucciones
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Typography
+                className="peso-section"
+                sx={{
+                  bgcolor: "action.hover",
+                  color: "text.primary",
+                }}
+              >
+                {t("common.instructions")}
               </Typography>
 
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Introduce los datos del niño o niña para
-                calcular su edad y su índice de masa corporal.
+              <Typography
+                variant="body2"
+                sx={{ mb: 2 }}
+              >
+                {t("pesoytalla.description")}
               </Typography>
 
-              <Typography className="field-label">
-                Sexo
+              {/* SEXO */}
+
+              <Typography
+                className="peso-label"
+                sx={{ color: labelColor }}
+              >
+                ⚥ {t("common.sex")}
               </Typography>
 
               <ToggleButtonGroup
                 value={sexo}
                 exclusive
-                onChange={(_, value) => {
-                  if (value) setSexo(value);
-                }}
                 fullWidth
+                onChange={(_, value: Sexo | null) => {
+                  if (value !== null) {
+                    setSexo(value);
+                    setResultado(null);
+                  }
+                }}
                 sx={{ mb: 3 }}
               >
                 <ToggleButton value="niño">
-                  <Male sx={{ mr: 1 }} />
-                  Niño
+                  {t("common.boy")}
+                  <Male
+                    sx={{
+                      ml: 1,
+                      color: "#55cfff",
+                    }}
+                  />
                 </ToggleButton>
 
                 <ToggleButton value="niña">
-                  <Female sx={{ mr: 1 }} />
-                  Niña
+                  {t("common.girl")}
+                  <Female
+                    sx={{
+                      ml: 1,
+                      color: "#ef7fa9",
+                    }}
+                  />
                 </ToggleButton>
               </ToggleButtonGroup>
 
-              <Typography className="field-label">
-                Fecha de nacimiento
+              {/* FECHA DE NACIMIENTO */}
+
+              <Typography
+                className="peso-label"
+                sx={{ color: labelColor }}
+              >
+                ☆ {t("pesoytalla.birthdate")}
               </Typography>
 
               <TextField
                 type="date"
                 fullWidth
+                size="small"
                 value={fechaNacimiento}
                 onChange={(e) => {
                   setFechaNacimiento(e.target.value);
                   setResultado(null);
                 }}
+                sx={inputStyle}
                 slotProps={{
                   htmlInput: {
-                    max: new Date().toLocaleDateString("en-CA"),
+                    max: [
+                      new Date().getFullYear(),
+                      String(
+                        new Date().getMonth() + 1
+                      ).padStart(2, "0"),
+                      String(
+                        new Date().getDate()
+                      ).padStart(2, "0"),
+                    ].join("-"),
                   },
                 }}
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography className="field-label">
-                Periodo
+            {/* COLUMNA DERECHA */}
+
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Typography
+                className="peso-section"
+                sx={{
+                  bgcolor: "action.hover",
+                  color: "text.primary",
+                }}
+              >
+                {t("common.period")}
               </Typography>
 
               <TextField
                 select
                 fullWidth
+                size="small"
                 value={periodo}
-                onChange={(e) => setPeriodo(e.target.value)}
-                sx={{ mb: 3 }}
+                onChange={(e) =>
+                  setPeriodo(e.target.value)
+                }
+                sx={{ ...inputStyle, mb: 3 }}
               >
-                <MenuItem value="2026-1">2026-1</MenuItem>
-                <MenuItem value="2026-2">2026-2</MenuItem>
-                <MenuItem value="2027-1">2027-1</MenuItem>
+                <MenuItem value="2026-1">
+                  2026-1
+                </MenuItem>
+                <MenuItem value="2026-2">
+                  2026-2
+                </MenuItem>
+                <MenuItem value="2027-1">
+                  2027-1
+                </MenuItem>
               </TextField>
 
-              <Typography className="field-label">
-                EBDI / Zona
+              {/* ZONA */}
+
+              <Typography
+                className="peso-section"
+                sx={{
+                  bgcolor: "action.hover",
+                  color: "text.primary",
+                }}
+              >
+                {t("common.zone")}
               </Typography>
 
               <TextField
                 fullWidth
-                placeholder="Ingresa la zona"
+                size="small"
+                placeholder={t("common.zone")}
                 value={zona}
-                onChange={(e) => setZona(e.target.value)}
-                sx={{ mb: 3 }}
+                onChange={(e) =>
+                  setZona(e.target.value)
+                }
+                sx={{ ...inputStyle, mb: 3 }}
               />
 
-              <Typography className="field-label">
-                ☆ Altura
+              {/* ALTURA */}
+
+              <Typography
+                className="peso-label"
+                sx={{ color: labelColor }}
+              >
+                ☆ {t("pesoytalla.height")}
               </Typography>
 
-              <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
+              <Box className="peso-measure-row">
                 <TextField
                   select
+                  size="small"
                   value={unidadAltura}
                   onChange={(e) => {
                     setUnidadAltura(e.target.value);
                     setResultado(null);
                   }}
-                  sx={{ width: "35%" }}
+                  sx={{
+                    ...inputStyle,
+                    minWidth: 100,
+                  }}
                 >
                   <MenuItem value="cm">cm</MenuItem>
                   <MenuItem value="m">m</MenuItem>
@@ -281,29 +456,46 @@ export const PesoYTalla = () => {
 
                 <TextField
                   type="number"
-                  placeholder="Cantidad"
+                  size="small"
                   fullWidth
+                  placeholder={t("common.quantity")}
                   value={altura}
                   onChange={(e) => {
                     setAltura(e.target.value);
                     setResultado(null);
                   }}
+                  sx={inputStyle}
+                  slotProps={{
+                    htmlInput: {
+                      min: 0,
+                      step: "any",
+                    },
+                  }}
                 />
               </Box>
 
-              <Typography className="field-label">
-                ☆ Peso
+              {/* PESO */}
+
+              <Typography
+                className="peso-label"
+                sx={{ color: labelColor }}
+              >
+                ☆ {t("pesoytalla.weight")}
               </Typography>
 
-              <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
+              <Box className="peso-measure-row">
                 <TextField
                   select
+                  size="small"
                   value={unidadPeso}
                   onChange={(e) => {
                     setUnidadPeso(e.target.value);
                     setResultado(null);
                   }}
-                  sx={{ width: "35%" }}
+                  sx={{
+                    ...inputStyle,
+                    minWidth: 100,
+                  }}
                 >
                   <MenuItem value="kg">kg</MenuItem>
                   <MenuItem value="lb">lb</MenuItem>
@@ -311,28 +503,42 @@ export const PesoYTalla = () => {
 
                 <TextField
                   type="number"
-                  placeholder="Cantidad"
+                  size="small"
                   fullWidth
+                  placeholder={t("common.quantity")}
                   value={peso}
                   onChange={(e) => {
                     setPeso(e.target.value);
                     setResultado(null);
+                  }}
+                  sx={inputStyle}
+                  slotProps={{
+                    htmlInput: {
+                      min: 0,
+                      step: "any",
+                    },
                   }}
                 />
               </Box>
             </Grid>
           </Grid>
 
-          {resultado && (
+          {/* RESULTADOS */}
+
+          {resultado !== null && (
             <Alert severity="success" sx={{ mt: 3 }}>
-              <Typography>
-                Edad: {resultado.edad}
+              <Typography fontWeight="bold">
+                {t("pesoytalla.age")}: {resultado.edad}
               </Typography>
-              <Typography>
-                IMC: {resultado.imc}
+
+              <Typography fontWeight="bold">
+                {t("pesoytalla.bmi")}:{" "}
+                {resultado.imc.toFixed(2)} kg/m²
               </Typography>
             </Alert>
           )}
+
+          {/* BOTONES */}
 
           <Box className="peso-actions">
             <Button
@@ -340,16 +546,17 @@ export const PesoYTalla = () => {
               startIcon={<Calculate />}
               onClick={calcular}
             >
-              Calcular
+              {t("common.calculate")}
             </Button>
 
             <Button
               variant="contained"
               startIcon={<Save />}
               onClick={guardar}
-              className="guardar-btn"
+              disabled={isPending}
+              className="peso-guardar"
             >
-              Guardar
+              {t("common.save")}
             </Button>
           </Box>
         </CardContent>

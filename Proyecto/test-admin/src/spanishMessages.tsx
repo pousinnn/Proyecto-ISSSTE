@@ -346,7 +346,88 @@ const spanishMessages: TranslationMessages = {
                 completed: "Completada",
             },
         },
+        resultados: {
+            name: "Resultados",
+        },
+        pesoytalla: {
+            name: "Peso y Talla",
+        },
+        tallablanca: {
+            name: "Talla Blanco",
+        },
+        perimetrocefalico: {
+            name: "Perímetro Cefálico",
+        },
     },
+    custom: {
+    resources: {
+      resultados: "Resultados",
+      pesoytalla: "Peso y Talla",
+      tallablanca: "Talla Blanco",
+      perimetrocefalico: "Perímetro Cefálico",
+    },
+
+    common: {
+      instructions: "Instrucciones",
+      sex: "Sexo",
+      boy: "Niño",
+      girl: "Niña",
+      period: "Periodo",
+      zone: "EBDI / Zona",
+      unit: "Unidad",
+      quantity: "Cantidad",
+      save: "Guardar",
+      calculate: "Calcular",
+      convert: "Convertir",
+      search: "Buscar",
+    },
+
+    pesoytalla: {
+      title: "Calculadora Peso & Talla",
+      birthdate: "Fecha de nacimiento",
+      height: "Altura",
+      weight: "Peso",
+      age: "Edad",
+      bmi: "IMC",
+      description:
+        "Selecciona el sexo, la fecha de nacimiento y registra el peso y la altura.",
+    },
+
+    tallablanca: {
+      title: "Calculadora Talla Blanco",
+      fatherHeight: "Altura padre",
+      motherHeight: "Altura madre",
+      result: "Talla blanco familiar",
+      description:
+        "Ingresa la altura del padre y de la madre.",
+    },
+
+    perimetrocefalico: {
+      title: "Calculadora Perímetro Cefálico",
+      perimeter: "Perímetro",
+      result: "Perímetro cefálico",
+      description:
+        "Selecciona el sexo e ingresa el perímetro cefálico.",
+    },
+
+    resultados: {
+      title: "Resultados",
+      history: "Historial",
+      nutritionHistory: "Historial Nutrición",
+      name: "Nombre",
+      titleColumn: "Título",
+      content: "Contenido",
+      date: "Fecha",
+    },
+
+    notifications: {
+      saved: "Registro guardado correctamente",
+      error: "Error al guardar el registro",
+      required: "Completa los campos obligatorios",
+      calculated: "Cálculo realizado correctamente",
+      invalidMeasurement: "Ingresa una medida válida",
+    },
+  },
 };
 
 export default spanishMessages;
