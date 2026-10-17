@@ -9,6 +9,8 @@ import englishMessages from "./englishMessages";
 import polyglotI18nProvider from "ra-i18n-polyglot";
 import MyLayout from './MyLayout';
 
+//GetIdentity
+
 //LOGIN
 //import MyLoginPage from './MyLoginPage';
 

@@ -386,13 +386,21 @@ const englishMessages: TranslationMessages = {
         },
     },
     custom: {
+    dashboard: {
+        welcome: "Welcome, %{name}",
+        loading: "Loading user...",
+        error: "Error loading user",
+        adminTitle: "Welcome to the administration",
+        adminDescription: "Administration dashboard",
+        userId: "ID: %{id}",
+    },
     resources: {
       resultados: "Results",
       pesoytalla: "Weight and Height",
       tallablanca: "White Height",
       perimetrocefalico: "Head Circumference",
     },
-
+    
     common: {
       instructions: "Instructions",
       sex: "Sex",

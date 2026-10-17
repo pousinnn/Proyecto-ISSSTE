@@ -4,7 +4,7 @@ import { AuthProvider } from "react-admin";
 export const authProvider: AuthProvider = {
     // called when the user attempts to log in
     async login({ username, password }) {
-        if(username !== "A01787292@tec.mx" || password !== "TC2007B"){
+        if(username !== "A01787292" ||username !== "A01782041" ||username !== "A01787172" || password !== "123"){
             throw new Error('Login failed');
         }
         // accept all username/password combinations
@@ -29,5 +29,21 @@ export const authProvider: AuthProvider = {
         if (!localStorage.getItem("username")) {
             throw new Error("Authentication required");
         }
+    },
+    getPermissions: async () => {
+        return Promise.resolve();
+    },
+
+    getIdentity: async () => {
+        const username = localStorage.getItem("username");
+
+        if (!username) {
+            return Promise.reject();
+        }
+
+        return {
+            id: username,
+            fullName: username,
+        };
     },
 };

@@ -242,6 +242,7 @@ const spanishMessages: TranslationMessages = {
             help:
                 "Filtra la lista y guarda esta consulta para utilizarla después",
         },
+        
 
         guesser: {
             empty: {
@@ -295,7 +296,6 @@ const spanishMessages: TranslationMessages = {
                 website: "Sitio web",
             },
         },
-
         posts: {
             name: "Publicacion |||| Publicaciones",
             fields: {
@@ -360,6 +360,15 @@ const spanishMessages: TranslationMessages = {
         },
     },
     custom: {
+        dashboard: {
+    welcome: "Bienvenido, %{name}",
+        loading: "Cargando usuario...",
+        error: "Error al obtener usuario",
+        adminTitle: "Bienvenido a la administración",
+        adminDescription: "Panel de administración",
+        userId: "ID: %{id}",
+    },
+
     resources: {
       resultados: "Resultados",
       pesoytalla: "Peso y Talla",
