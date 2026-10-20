@@ -1,0 +1,124 @@
+
+.talla-page {
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.talla-card {
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 14px !important;
+  padding: 15px;
+}
+
+.talla-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.talla-title {
+  color: #e879c8;
+  font-weight: bold !important;
+  letter-spacing: 1px;
+}
+
+.talla-subtitle {
+  padding: 5px 15px;
+  margin-top: 8px !important;
+  border-radius: 6px;
+  letter-spacing: 3px;
+}
+
+.talla-mascota {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.talla-section {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px !important;
+  font-weight: 500 !important;
+}
+
+.talla-label {
+  font-weight: bold !important;
+  margin-bottom: 8px !important;
+  font-size: 17px !important;
+}
+
+.talla-height-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.talla-card .MuiInputBase-root {
+  border-radius: 6px;
+}
+
+.talla-card .MuiToggleButton-root {
+  font-weight: bold;
+  text-transform: none;
+}
+
+.talla-card .MuiToggleButton-root.Mui-selected {
+  background-color: #9caf32;
+  color: #ffffff;
+}
+
+.talla-card .MuiToggleButton-root.Mui-selected:hover {
+  background-color: #83952b;
+}
+
+.talla-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.talla-guardar {
+  background-color: #9bc94b !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+.talla-guardar:hover {
+  background-color: #7ca533 !important;
+}
+
+@media (max-width: 600px) {
+  .talla-page {
+    padding: 12px;
+  }
+
+  .talla-card {
+    padding: 5px;
+  }
+
+  .talla-title {
+    font-size: 22px !important;
+  }
+
+  .talla-mascota {
+    width: 55px;
+    height: 55px;
+  }
+
+  .talla-height-row {
+    gap: 6px;
+  }
+
+  .talla-actions {
+    flex-wrap: wrap;
+  }
+}

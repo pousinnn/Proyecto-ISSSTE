@@ -1,0 +1,125 @@
+
+.perimetro-page {
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.perimetro-card {
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 14px !important;
+  padding: 15px;
+}
+
+.perimetro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.perimetro-title {
+  color: #e879c8;
+  font-weight: bold !important;
+  letter-spacing: 1px;
+}
+
+.perimetro-subtitle {
+  padding: 5px 15px;
+  margin-top: 8px !important;
+  border-radius: 6px;
+  letter-spacing: 3px;
+}
+
+.perimetro-mascota {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.perimetro-section {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px !important;
+  font-weight: 500 !important;
+}
+
+.perimetro-label {
+  font-weight: bold !important;
+  margin-bottom: 8px !important;
+  font-size: 17px !important;
+}
+
+.perimetro-measure-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  max-width: 400px;
+}
+
+.perimetro-card .MuiInputBase-root {
+  border-radius: 6px;
+}
+
+.perimetro-card .MuiToggleButton-root {
+  font-weight: bold;
+  text-transform: none;
+}
+
+.perimetro-card .MuiToggleButton-root.Mui-selected {
+  background-color: #9caf32;
+  color: #ffffff;
+}
+
+.perimetro-card .MuiToggleButton-root.Mui-selected:hover {
+  background-color: #83952b;
+}
+
+.perimetro-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.perimetro-guardar {
+  background-color: #9bc94b !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+.perimetro-guardar:hover {
+  background-color: #7ca533 !important;
+}
+
+@media (max-width: 600px) {
+  .perimetro-page {
+    padding: 12px;
+  }
+
+  .perimetro-card {
+    padding: 5px;
+  }
+
+  .perimetro-title {
+    font-size: 22px !important;
+  }
+
+  .perimetro-mascota {
+    width: 55px;
+    height: 55px;
+  }
+
+  .perimetro-measure-row {
+    gap: 6px;
+  }
+
+  .perimetro-actions {
+    flex-wrap: wrap;
+  }
+}
