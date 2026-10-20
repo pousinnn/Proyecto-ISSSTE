@@ -33,6 +33,7 @@ import {
 } from "react-admin";
 
 import "./pesoytalla.css";
+import { SelectorPaciente } from "../SelectorPaciente";
 
 type Sexo = "niño" | "niña";
 
@@ -56,6 +57,7 @@ export const PesoYTalla = () => {
   const [fechaNacimiento, setFechaNacimiento] = useState("");
   const [periodo, setPeriodo] = useState("");
   const [zona, setZona] = useState("");
+  const [paciente, setPaciente] = useState("");
 
   const [altura, setAltura] = useState("");
   const [unidadAltura, setUnidadAltura] = useState("cm");
@@ -172,6 +174,7 @@ export const PesoYTalla = () => {
     if (!datos) return;
 
     const registro = {
+      paciente,
       sexo,
       fechaNacimiento,
       periodo,
@@ -197,8 +200,10 @@ export const PesoYTalla = () => {
             type: "success",
           });
         },
-        onError: () => {
-          notify(t("notifications.error"), {
+        onError: (error) => {
+          // Si el servidor explica por qué rechazó los datos, mostrar ese mensaje
+          const mensaje = (error as { body?: { error?: string } })?.body?.error;
+          notify(mensaje ?? t("notifications.error"), {
             type: "error",
           });
         },
@@ -403,6 +408,15 @@ export const PesoYTalla = () => {
                   2027-1
                 </MenuItem>
               </TextField>
+
+              {/* PACIENTE (solo doctor y admin) */}
+
+              <SelectorPaciente
+                value={paciente}
+                onChange={setPaciente}
+                className="peso-section"
+                inputSx={{ ...inputStyle, mb: 3 }}
+              />
 
               {/* ZONA */}
 

@@ -54,16 +54,16 @@ export const App = () =>(
     authProvider={authProvider}
     dashboard={Dashboard}
     i18nProvider={i18nProvider}>
-        //RESULTADOS
+        {/* RESULTADOS */}
         <Resource name="resultados" list={Resultados} icon={Assessment} />
 
-        //PESO Y TALLA
+        {/* PESO Y TALLA */}
         <Resource name="pesoytalla" list={PesoYTalla} icon={MonitorWeight} />
         
-        //TALLA BLANCA
+        {/* TALLA BLANCA */}
         <Resource name="tallablanca" list={TallaBlanca} icon={Height}/>
 
-        //PERIMETRO CEFALICO
+        {/* PERIMETRO CEFALICO */}
         <Resource name="perimetrocefalico" list={PerimetroCefalico} icon={Straighten} />
     </Admin>
 );

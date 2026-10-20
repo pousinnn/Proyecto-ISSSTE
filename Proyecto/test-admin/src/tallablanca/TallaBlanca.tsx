@@ -33,6 +33,7 @@ import {
 } from "react-admin";
 
 import "./TallaBlanca.css";
+import { SelectorPaciente } from "../SelectorPaciente";
 
 type Sexo = "niño" | "niña";
 type Unidad = "cm" | "m" | "in";
@@ -52,6 +53,7 @@ export const TallaBlanca = () => {
   const [sexo, setSexo] = useState<Sexo>("niño");
   const [periodo, setPeriodo] = useState("");
   const [zona, setZona] = useState("");
+  const [paciente, setPaciente] = useState("");
 
   const [alturaPadre, setAlturaPadre] = useState("");
   const [unidadPadre, setUnidadPadre] = useState<Unidad>("cm");
@@ -142,6 +144,7 @@ export const TallaBlanca = () => {
     if (!datos) return;
 
     const registro = {
+      paciente,
       sexo,
       periodo,
       zona,
@@ -164,8 +167,10 @@ export const TallaBlanca = () => {
           });
         },
 
-        onError: () => {
-          notify(t("notifications.error"), {
+        onError: (error) => {
+          // Si el servidor explica por qué rechazó los datos, mostrar ese mensaje
+          const mensaje = (error as { body?: { error?: string } })?.body?.error;
+          notify(mensaje ?? t("notifications.error"), {
             type: "error",
           });
         },
@@ -434,6 +439,15 @@ export const TallaBlanca = () => {
                 <MenuItem value="2026-2">2026-2</MenuItem>
                 <MenuItem value="2027-1">2027-1</MenuItem>
               </TextField>
+
+              {/* PACIENTE (solo doctor y admin) */}
+
+              <SelectorPaciente
+                value={paciente}
+                onChange={setPaciente}
+                className="talla-section"
+                inputSx={{ ...inputStyle, mb: 3 }}
+              />
 
               {/* ZONA */}
 

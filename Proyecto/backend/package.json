@@ -1,0 +1,21 @@
+{
+  "name": "issste-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API REST + MongoDB para el panel test-admin",
+  "scripts": {
+    "start": "node --env-file=.env src/server.js",
+    "dev": "node --env-file=.env --watch src/server.js",
+    "crear-usuario": "node --env-file=.env scripts/crearUsuario.js"
+  },
+  "dependencies": {
+    "argon2": "^0.45.1",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.7.0"
+  }
+}

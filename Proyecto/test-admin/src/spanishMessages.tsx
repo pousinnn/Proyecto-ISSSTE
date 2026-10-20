@@ -383,6 +383,8 @@ const spanishMessages: TranslationMessages = {
       girl: "Niña",
       period: "Periodo",
       zone: "EBDI / Zona",
+      patient: "Paciente",
+      selectPatient: "Selecciona un paciente",
       unit: "Unidad",
       quantity: "Cantidad",
       save: "Guardar",

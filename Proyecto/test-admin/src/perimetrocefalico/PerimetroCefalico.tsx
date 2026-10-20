@@ -32,6 +32,7 @@ import {
 } from "react-admin";
 
 import "./PerimetroCefalico.css";
+import { SelectorPaciente } from "../SelectorPaciente";
 
 type Sexo = "niño" | "niña";
 
@@ -50,6 +51,7 @@ export const PerimetroCefalico = () => {
   const [sexo, setSexo] = useState<Sexo>("niño");
   const [periodo, setPeriodo] = useState("");
   const [zona, setZona] = useState("");
+  const [paciente, setPaciente] = useState("");
 
   const [unidad, setUnidad] = useState("cm");
   const [cantidad, setCantidad] = useState("");
@@ -120,6 +122,7 @@ export const PerimetroCefalico = () => {
     if (medidaCm === null) return;
 
     const registro = {
+      paciente,
       sexo,
       periodo,
       zona,
@@ -139,8 +142,10 @@ export const PerimetroCefalico = () => {
             type: "success",
           });
         },
-        onError: () => {
-          notify(t("notifications.error"), {
+        onError: (error) => {
+          // Si el servidor explica por qué rechazó los datos, mostrar ese mensaje
+          const mensaje = (error as { body?: { error?: string } })?.body?.error;
+          notify(mensaje ?? t("notifications.error"), {
             type: "error",
           });
         },
@@ -366,6 +371,15 @@ export const PerimetroCefalico = () => {
                   2027-1
                 </MenuItem>
               </TextField>
+
+              {/* PACIENTE (solo doctor y admin) */}
+
+              <SelectorPaciente
+                value={paciente}
+                onChange={setPaciente}
+                className="perimetro-section"
+                inputSx={{ ...inputStyle, mb: 3 }}
+              />
 
               {/* ZONA */}
 

@@ -408,6 +408,8 @@ const englishMessages: TranslationMessages = {
       girl: "Girl",
       period: "Period",
       zone: "EBDI / Zone",
+      patient: "Patient",
+      selectPatient: "Select a patient",
       unit: "Unit",
       quantity: "Quantity",
       save: "Save",
