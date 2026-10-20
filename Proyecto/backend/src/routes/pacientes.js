@@ -4,6 +4,7 @@ import { getDb } from "../db.js";
 
 const router = Router();
 
+//Restringe los resultados que pueden ver los pacientes
 router.get("/", async (_req, res) => {
   const pacientes = await getDb()
     .collection("usuarios")

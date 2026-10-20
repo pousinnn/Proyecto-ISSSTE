@@ -1,4 +1,4 @@
-
+//Checa el token y ve si se tardó en utilizarlo para que ya no funcione
 import jwt from "jsonwebtoken";
 
 export function requiereLogin(req, res, next) {

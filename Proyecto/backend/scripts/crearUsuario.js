@@ -18,6 +18,7 @@ if (!ROLES.includes(rol)) {
   process.exit(1);
 }
 
+
 const db = await conectar();
 const passwordHash = await hashPassword(password);
 

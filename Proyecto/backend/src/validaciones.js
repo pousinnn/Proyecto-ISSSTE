@@ -1,5 +1,5 @@
 
-
+//Validar que la información proporcionada por el usuario
 export class ErrorValidacion extends Error {
   constructor(mensaje) {
     super(mensaje);

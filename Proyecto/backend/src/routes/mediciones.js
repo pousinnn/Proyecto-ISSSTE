@@ -5,7 +5,7 @@ import { getDb } from "../db.js";
 import { requiereRol } from "../middleware/auth.js";
 import { validadores, ErrorValidacion } from "../validaciones.js";
 
-
+//Guarda en la base de datos las mediciones del paciente
 export const aCliente = ({ _id, ...resto }) => ({ id: _id.toString(), ...resto });
 
 const idValido = (id) => (ObjectId.isValid(id) ? new ObjectId(id) : null);

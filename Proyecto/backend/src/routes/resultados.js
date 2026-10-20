@@ -4,7 +4,7 @@ import { getDb } from "../db.js";
 import { aCliente, escaparRegex, filtroAcceso } from "./mediciones.js";
 
 const router = Router();
-
+//Acomoda y estrae los resultados de la base de datos 
 const FUENTES = {
   pesoytalla: {
     titulo: "Peso y talla",

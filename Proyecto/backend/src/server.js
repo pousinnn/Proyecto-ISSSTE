@@ -10,6 +10,8 @@ import rutasPacientes from "./routes/pacientes.js";
 import { rutasMediciones } from "./routes/mediciones.js";
 import { ErrorValidacion } from "./validaciones.js";
 
+//Api que conecta mongodb con la página de admin
+
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.error("Falta JWT_SECRET en .env (mínimo 32 caracteres). Revisa .env.example");
   process.exit(1);

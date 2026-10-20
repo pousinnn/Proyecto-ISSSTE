@@ -6,7 +6,7 @@ import { hashPassword, verificarPassword } from "../passwords.js";
 
 const router = Router();
 
-
+//Limite de intentos en 10 minutos 
 const limiteLogin = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
@@ -15,7 +15,7 @@ const limiteLogin = rateLimit({
   message: { error: "Demasiados intentos. Espera 15 minutos." },
 });
 
-
+//checar el hash y el token del usuario
 const HASH_FALSO = await hashPassword("usuario-inexistente");
 
 router.post("/login", limiteLogin, async (req, res) => {
