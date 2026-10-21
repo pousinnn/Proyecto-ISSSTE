@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Box,
@@ -34,12 +33,22 @@ import {
 
 import "./pesoytalla.css";
 import { SelectorPaciente } from "../SelectorPaciente";
+import { GraficaCrecimiento } from "./GraficaCrecimiento";
+import {
+  cargarTablasCDC,
+  codigoSexo,
+  evaluarCrecimiento,
+  severidadGeneral,
+  type Evaluacion,
+  type Indicador,
+} from "./cdc";
 
 type Sexo = "niño" | "niña";
 
 type Resultado = {
   edad: string;
   imc: number;
+  evaluacion: Evaluacion | null;
 };
 
 export const PesoYTalla = () => {
@@ -51,6 +60,9 @@ export const PesoYTalla = () => {
 
   const notify = useNotify();
   const [create, { isPending }] = useCreate();
+
+  // Tablas CDC (se leen una sola vez)
+  const tablas = useMemo(() => cargarTablasCDC(), []);
 
   // Estados
   const [sexo, setSexo] = useState<Sexo>("niño");
@@ -67,8 +79,9 @@ export const PesoYTalla = () => {
 
   const [resultado, setResultado] = useState<Resultado | null>(null);
 
-  // Traducción corta para reutilizar en JSX
-  const t = (key: string) => translate(`custom.${key}`);
+  // Traducción corta para reutilizar en JSX (fallback opcional si falta la clave)
+  const t = (key: string, fallback?: string) =>
+    translate(`custom.${key}`, fallback ? { _: fallback } : undefined);
 
   // Calcular edad
   const calcularEdad = (fecha: string): string => {
@@ -144,16 +157,31 @@ export const PesoYTalla = () => {
     };
   };
 
+  // Arma el resultado a mostrar (edad, IMC y evaluación CDC)
+  const construirResultado = (datos: {
+    edad: string;
+    imc: number;
+    alturaCm: number;
+    pesoKg: number;
+  }): Resultado => ({
+    edad: datos.edad,
+    imc: datos.imc,
+    evaluacion: evaluarCrecimiento(
+      tablas,
+      sexo,
+      fechaNacimiento,
+      datos.alturaCm,
+      datos.pesoKg
+    ),
+  });
+
   // Calcular IMC
   const calcular = () => {
     const datos = obtenerMedidas();
 
     if (!datos) return;
 
-    setResultado({
-      edad: datos.edad,
-      imc: datos.imc,
-    });
+    setResultado(construirResultado(datos));
 
     notify(t("notifications.calculated"), {
       type: "success",
@@ -191,10 +219,7 @@ export const PesoYTalla = () => {
       { data: registro },
       {
         onSuccess: () => {
-          setResultado({
-            edad: datos.edad,
-            imc: datos.imc,
-          });
+          setResultado(construirResultado(datos));
 
           notify(t("notifications.saved"), {
             type: "success",
@@ -211,6 +236,31 @@ export const PesoYTalla = () => {
     );
   };
 
+  // Línea de texto para un indicador CDC
+  const lineaIndicador = (
+    nombre: string,
+    ind: Indicador | null,
+    unidad: string
+  ) => (
+    <Typography variant="body2" sx={{ mt: 0.5 }}>
+      <strong>{nombre}:</strong>{" "}
+      {ind
+        ? `${t("pesoytalla.percentile", "Percentil")} ${ind.percentil.toFixed(
+            1
+          )} (z = ${ind.z.toFixed(2)}) · ${ind.categoria}${
+            ind.referencia !== null
+              ? ` · ${t("pesoytalla.median", "Mediana")}: ${ind.referencia.toFixed(
+                  1
+                )} ${unidad}`
+              : ""
+          }`
+        : t(
+            "pesoytalla.outOfRange",
+            "Fuera del rango de las tablas CDC"
+          )}
+    </Typography>
+  );
+
   // Colores dinámicos
   const labelColor = isDark ? "#e9ff75" : "#748c1f";
 
@@ -225,6 +275,9 @@ export const PesoYTalla = () => {
       opacity: 1,
     },
   };
+
+  const evaluacion = resultado?.evaluacion ?? null;
+  const k = codigoSexo(sexo);
 
   return (
     <Box
@@ -540,7 +593,10 @@ export const PesoYTalla = () => {
           {/* RESULTADOS */}
 
           {resultado !== null && (
-            <Alert severity="success" sx={{ mt: 3 }}>
+            <Alert
+              severity={severidadGeneral(evaluacion)}
+              sx={{ mt: 3 }}
+            >
               <Typography fontWeight="bold">
                 {t("pesoytalla.age")}: {resultado.edad}
               </Typography>
@@ -549,7 +605,77 @@ export const PesoYTalla = () => {
                 {t("pesoytalla.bmi")}:{" "}
                 {resultado.imc.toFixed(2)} kg/m²
               </Typography>
+
+              {evaluacion && (
+                <>
+                  {lineaIndicador(
+                    t("pesoytalla.bmiForAge", "IMC para la edad"),
+                    evaluacion.imcEdad,
+                    "kg/m²"
+                  )}
+                  {lineaIndicador(
+                    t("pesoytalla.heightForAge", "Talla para la edad"),
+                    evaluacion.tallaEdad,
+                    "cm"
+                  )}
+                  {lineaIndicador(
+                    t("pesoytalla.weightForHeight", "Peso para la talla"),
+                    evaluacion.pesoTalla,
+                    "kg"
+                  )}
+
+                  {evaluacion.fueraDeRango && (
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      {t(
+                        "pesoytalla.ageWarning",
+                        "Las tablas CDC aplican de 2 a 20 años; para menores de 2 años se recomiendan las curvas OMS."
+                      )}
+                    </Typography>
+                  )}
+                </>
+              )}
             </Alert>
+          )}
+
+          {/* GRÁFICAS */}
+
+          {evaluacion && (
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <GraficaCrecimiento
+                  titulo={t("pesoytalla.weightForHeight", "Peso para la talla")}
+                  filas={tablas.pesoTalla[k]}
+                  curvas={["p5", "p10", "p25", "p50", "p75", "p90", "p95"]}
+                  etiquetaX="Talla (cm)"
+                  etiquetaY="Peso (kg)"
+                  punto={{ x: evaluacion.alturaCm, y: evaluacion.pesoKg }}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <GraficaCrecimiento
+                  titulo={t("pesoytalla.heightForAge", "Talla para la edad")}
+                  filas={tablas.tallaEdad[k]}
+                  curvas={["p3", "p10", "p25", "p50", "p75", "p90", "p97"]}
+                  etiquetaX="Edad (años)"
+                  etiquetaY="Talla (cm)"
+                  xDivisor={12}
+                  punto={{ x: evaluacion.edadMeses, y: evaluacion.alturaCm }}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <GraficaCrecimiento
+                  titulo={t("pesoytalla.bmiForAge", "IMC para la edad")}
+                  filas={tablas.imcEdad[k]}
+                  curvas={["p5", "p10", "p25", "p50", "p75", "p85", "p95"]}
+                  etiquetaX="Edad (años)"
+                  etiquetaY="IMC (kg/m²)"
+                  xDivisor={12}
+                  punto={{ x: evaluacion.edadMeses, y: evaluacion.imc }}
+                />
+              </Grid>
+            </Grid>
           )}
 
           {/* BOTONES */}
