@@ -384,6 +384,9 @@ const englishMessages: TranslationMessages = {
         perimetrocefalico: {
             name: "Head Circumference",
         },
+        infantes: {
+            name: "Registry",
+        },
     },
     custom: {
     dashboard: {

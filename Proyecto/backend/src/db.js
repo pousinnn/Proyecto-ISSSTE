@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import { prepararInfantes } from "./infantes/esquema.js";
 
 const client = new MongoClient(process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017");
 
@@ -12,6 +13,7 @@ export async function conectar() {
   for (const coleccion of ["pesoytalla", "tallablanca", "perimetrocefalico"]) {
     await db.collection(coleccion).createIndex({ fecha: -1 });
   }
+  await prepararInfantes(db);
 
   return db;
 }

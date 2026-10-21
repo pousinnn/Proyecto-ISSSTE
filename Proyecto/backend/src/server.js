@@ -7,6 +7,7 @@ import { requiereLogin, requiereRol } from "./middleware/auth.js";
 import rutasAuth from "./routes/auth.js";
 import rutasResultados from "./routes/resultados.js";
 import rutasPacientes from "./routes/pacientes.js";
+import rutasInfantes from "./routes/infantes.js";
 import { rutasMediciones } from "./routes/mediciones.js";
 import { ErrorValidacion } from "./validaciones.js";
 
@@ -40,6 +41,7 @@ app.use("/api", rutasAuth);
 app.use("/api", requiereLogin);
 app.use("/api/resultados", rutasResultados);
 app.use("/api/pacientes", requiereRol("admin", "doctor"), rutasPacientes);
+app.use("/api/infantes", requiereRol("admin", "doctor"), rutasInfantes);
 for (const recurso of ["pesoytalla", "tallablanca", "perimetrocefalico"]) {
   app.use(`/api/${recurso}`, rutasMediciones(recurso));
 }

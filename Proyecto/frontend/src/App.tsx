@@ -31,6 +31,10 @@ import { Height } from "@mui/icons-material";
 import { PerimetroCefalico } from "./perimetrocefalico/PerimetroCefalico";
 import { Straighten } from "@mui/icons-material";
 
+//PADRON
+import { PadronList, PadronShow } from "./padron/Padron";
+import { ChildCare } from "@mui/icons-material";
+
 const i18nProvider = polyglotI18nProvider(
     (locale) => {
         if (locale === "en") {
@@ -65,5 +69,12 @@ export const App = () =>(
 
         {/* PERIMETRO CEFALICO */}
         <Resource name="perimetrocefalico" list={PerimetroCefalico} icon={Straighten} />
+
+        {/* PADRON: solo doctor y admin (el servidor también lo bloquea para pacientes) */}
+        {(permissions: string) =>
+            permissions === "admin" || permissions === "doctor"
+                ? <Resource name="infantes" list={PadronList} show={PadronShow} icon={ChildCare} />
+                : null
+        }
     </Admin>
 );

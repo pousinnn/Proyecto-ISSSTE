@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node --env-file=.env src/server.js",
     "dev": "node --env-file=.env --watch src/server.js",
-    "crear-usuario": "node --env-file=.env scripts/crearUsuario.js"
+    "crear-usuario": "node --env-file=.env scripts/crearUsuario.js",
+    "importar-padron": "node --env-file=.env scripts/importarPadron.js"
   },
   "dependencies": {
     "argon2": "^0.45.1",

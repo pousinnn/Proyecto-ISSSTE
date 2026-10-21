@@ -358,6 +358,9 @@ const spanishMessages: TranslationMessages = {
         perimetrocefalico: {
             name: "Perímetro Cefálico",
         },
+        infantes: {
+            name: "Padrón",
+        },
     },
     custom: {
         dashboard: {
