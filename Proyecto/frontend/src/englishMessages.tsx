@@ -361,6 +361,9 @@ const englishMessages: TranslationMessages = {
                 thumbnailUrl: "Thumbnail",
             },
         },
+        historial: {
+            name: "History",
+        },
 
         todos: {
             name: "To Do |||| To Do",
@@ -458,6 +461,18 @@ const englishMessages: TranslationMessages = {
       content: "Content",
       date: "Date",
     },
+    
+    historial: {
+        title: "Record History",
+        name: "Name",
+        type: "Type",
+        date: "Date",
+        result: "Result",
+        actions: "Actions",
+        view: "View",
+        details: "Record Details",
+    },
+
 
     notifications: {
       saved: "Record saved successfully",

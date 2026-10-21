@@ -325,7 +325,9 @@ const spanishMessages: TranslationMessages = {
                 title: "Título",
             },
         },
-
+        historial: {
+            name: "Historial",
+        },
         photos: {
             name: "Foto |||| Fotos",
             fields: {
@@ -433,6 +435,18 @@ const spanishMessages: TranslationMessages = {
       content: "Contenido",
       date: "Fecha",
     },
+    
+    historial: {
+        title: "Historial de registros",
+        name: "Nombre",
+        type: "Tipo",
+        date: "Fecha",
+        result: "Resultado",
+        actions: "Acciones",
+        view: "Ver",
+        details: "Detalles del registro",
+    },
+
 
     notifications: {
       saved: "Registro guardado correctamente",
