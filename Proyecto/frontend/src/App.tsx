@@ -9,10 +9,12 @@ import englishMessages from "./englishMessages";
 import polyglotI18nProvider from "ra-i18n-polyglot";
 import MyLayout from './MyLayout';
 
-//GetIdentity
 
 //LOGIN
 //import MyLoginPage from './MyLoginPage';
+
+//BOTON NUEVO USUARIO
+import { UserCreate } from "./usuarios/UserCreate";
 
 
 //RESULTADOS
@@ -62,6 +64,7 @@ export const App = () =>(
     authProvider={authProvider}
     dashboard={Dashboard}
     i18nProvider={i18nProvider}>
+        <Resource name="users" create={UserCreate} />
         {/* RESULTADOS */}
         <Resource name="resultados" list={Resultados} icon={Assessment} />
 

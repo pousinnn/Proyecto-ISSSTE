@@ -6,11 +6,15 @@ import {
     UserMenu,
     useLogout,
     useGetIdentity,
-    LayoutProps
+    LayoutProps,
+    LocalesMenuButton,
+    ToggleThemeButton,
+    LoadingIndicator,
 } from 'react-admin';
 
 import { MenuItem, MenuItemProps, Typography } from '@mui/material';
 import ExitIcon from '@mui/icons-material/PowerSettingsNew';
+import { BotonNuevoUsuario } from './usuarios/BotonNuevoUsuario';
 
 // Botón de cerrar sesión
 const MyLogoutButton = forwardRef<HTMLLIElement, MenuItemProps>(
@@ -41,12 +45,22 @@ const MyUserMenu = () => (
     </UserMenu>
 );
 
+// Botones de la derecha: nuevo usuario + los que ya tenías (idioma, tema, refrescar)
+const MyToolbar = () => (
+    <>
+        <BotonNuevoUsuario />
+        <LocalesMenuButton />
+        <ToggleThemeButton />
+        <LoadingIndicator />
+    </>
+);
+
 // Barra superior con identidad del usuario
 const MyAppBar = () => {
     const { data: identity, isPending } = useGetIdentity();
 
     return (
-        <AppBar userMenu={<MyUserMenu />}>
+        <AppBar userMenu={<MyUserMenu />} toolbar={<MyToolbar />}>
             <Typography
                 variant="body1"
                 sx={{ marginLeft: 'auto', marginRight: 2 }}

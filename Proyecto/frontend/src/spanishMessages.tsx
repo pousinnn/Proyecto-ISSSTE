@@ -446,7 +446,23 @@ const spanishMessages: TranslationMessages = {
         view: "Ver",
         details: "Detalles del registro",
     },
-
+    users: {
+        new: "Nuevo usuario",
+        title: "Crear usuario",
+        name: "Nombre",
+        email: "Correo electrónico",
+        password: "Contraseña",
+        role: "Rol",
+        roles: {
+            admin: "Administrador",
+            doctor: "Doctor",
+            patient: "Paciente",
+        },
+        notifications: {
+            created: "Usuario creado correctamente",
+            error: "No se pudo crear el usuario",
+        },
+    },
 
     notifications: {
       saved: "Registro guardado correctamente",

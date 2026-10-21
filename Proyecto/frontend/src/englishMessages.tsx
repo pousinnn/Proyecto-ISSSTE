@@ -472,8 +472,24 @@ const englishMessages: TranslationMessages = {
         view: "View",
         details: "Record Details",
     },
-
-
+    users: {
+        new: "New user",
+        title: "Create user",
+        name: "Name",
+        email: "Email",
+        password: "Password",
+        role: "Role",
+        roles: {
+            admin: "Administrator",
+            doctor: "Doctor",
+            patient: "Patient",
+        },
+        notifications: {
+            created: "User created successfully",
+            error: "The user could not be created",
+        },
+    },
+    
     notifications: {
       saved: "Record saved successfully",
       error: "Error saving the record",
