@@ -8,10 +8,13 @@ import {
 
 import { useGetIdentity, useTranslate } from "react-admin";
 
+//Pagina de inicio que saluda al usuario
 export const Dashboard = () => {
+    //Saca los datos del usuario que inicio sesion
     const { data: identity, isPending, error } = useGetIdentity();
     const translate = useTranslate();
 
+    //Mensajes mientras carga o si hay error
     if (isPending) {
         return <p>{translate("custom.dashboard.loading")}</p>;
     }
@@ -22,6 +25,7 @@ export const Dashboard = () => {
 
     return (
         <>
+            {/* BIENVENIDA */}
             <Card sx={{ mb: 2 }}>
                 <CardContent>
                     <Typography variant="h5">
@@ -38,6 +42,7 @@ export const Dashboard = () => {
                 </CardContent>
             </Card>
 
+            {/* DESCRIPCION DEL PANEL */}
             <Card>
                 <CardHeader
                     title={translate("custom.dashboard.adminTitle")}

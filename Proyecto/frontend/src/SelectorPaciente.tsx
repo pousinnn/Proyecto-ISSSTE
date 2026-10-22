@@ -1,9 +1,7 @@
 import { MenuItem, TextField, Typography, SxProps, Theme } from "@mui/material";
 import { useGetList, usePermissions, useTranslate } from "react-admin";
 
-// Lista de pacientes para elegir de quién es la medición.
-// Solo la ven admin y doctor; un paciente siempre captura para sí mismo
-// (y aunque alguien la forzara a aparecer, el servidor ignora el valor).
+//Lista para elegir el paciente, solo la ven admin y doctor
 type Props = {
     value: string;
     onChange: (value: string) => void;
@@ -13,9 +11,11 @@ type Props = {
 
 export const SelectorPaciente = ({ value, onChange, className, inputSx }: Props) => {
     const translate = useTranslate();
+    //Revisa si el usuario puede elegir paciente
     const { permissions } = usePermissions();
     const puedeElegir = permissions === "admin" || permissions === "doctor";
 
+    //Trae la lista de pacientes
     const { data: pacientes = [] } = useGetList(
         "pacientes",
         { pagination: { page: 1, perPage: 100 }, sort: { field: "nombre", order: "ASC" } },
@@ -33,6 +33,7 @@ export const SelectorPaciente = ({ value, onChange, className, inputSx }: Props)
                 {translate("custom.common.patient")}
             </Typography>
 
+            {/* MENU DE PACIENTES */}
             <TextField
                 select
                 fullWidth

@@ -1,14 +1,10 @@
-// Cálculo de estado nutricio con las tablas LMS de los CDC Growth Charts (2–20 años).
-//
-// Archivos requeridos en ./cdc/ (CSV oficiales de CDC, sin modificar):
-//   statage.csv    -> Talla para la edad
-//   wtstat.csv     -> Peso para la talla
-//   bmiagerev.csv  -> IMC para la edad
+//Calcula el estado nutricio con las tablas del CDC (de 2 a 20 años)
 import statageRaw from "./cdc/statage.csv?raw";
 import wtstatRaw from "./cdc/wtstat.csv?raw";
 import bmiagerevRaw from "./cdc/bmiagerev.csv?raw";
 
-export type SexoCDC = "niño" | "niña";
+//Tipos de datos que usamos en los cálculos
+export type SexoCDC ="niño" | "niña";
 export type Nivel = "success" | "info" | "warning" | "error";
 
 export type Fila = {
@@ -54,11 +50,13 @@ export type Evaluacion = {
   imcEdad: Indicador | null;
 };
 
+//Cambia el sexo a número (1 niño, 2 niña)
 export const codigoSexo = (sexo: SexoCDC): 1 | 2 => (sexo === "niño" ? 1 : 2);
 
 /* ---------- Lectura de CSV ---------- */
 
-const parsearCsv = (crudo: string, clavesX: string[]): TablaCDC => {
+//Lee el archivo CSV y separa las filas de niños y niñas
+const parsearCsv =(crudo: string, clavesX: string[]): TablaCDC => {
   const tabla: TablaCDC = { 1: [], 2: [] };
 
   const lineas = crudo
@@ -109,6 +107,7 @@ const parsearCsv = (crudo: string, clavesX: string[]): TablaCDC => {
   return tabla;
 };
 
+//Carga las tablas una sola vez y las guarda
 let cache: TablasCDC | null = null;
 
 export const cargarTablasCDC = (): TablasCDC => {
@@ -208,12 +207,14 @@ const clasificarPesoTalla = (p: number): Clasificacion => {
 
 /* ---------- API pública ---------- */
 
+//Saca la edad en meses con la fecha de nacimiento
 export const edadEnMeses = (fechaISO: string, hoy: Date = new Date()) => {
   const nacimiento = new Date(fechaISO + "T00:00:00");
   return (hoy.getTime() - nacimiento.getTime()) / 86400000 / 30.4375;
 };
 
-const construirIndicador = (
+//Saca el percentil y la categoría de una medida
+const construirIndicador =(
   filas: Fila[],
   x: number,
   valor: number,
@@ -240,7 +241,8 @@ const construirIndicador = (
   };
 };
 
-export const evaluarCrecimiento = (
+//Evalúa la talla, el peso y el IMC del paciente
+export const evaluarCrecimiento =(
   tablas: TablasCDC,
   sexo: SexoCDC,
   fechaNacimiento: string,
@@ -278,7 +280,8 @@ export const evaluarCrecimiento = (
   };
 };
 
-export const severidadGeneral = (ev: Evaluacion | null): Nivel => {
+//Regresa el resultado más grave de los tres
+export const severidadGeneral =(ev: Evaluacion | null): Nivel => {
   const niveles = [ev?.imcEdad, ev?.tallaEdad, ev?.pesoTalla].map(
     (i) => i?.nivel
   );

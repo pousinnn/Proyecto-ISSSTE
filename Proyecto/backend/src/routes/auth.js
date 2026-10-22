@@ -18,6 +18,7 @@ const limiteLogin = rateLimit({
 //checar el hash y el token del usuario
 const HASH_FALSO = await hashPassword("usuario-inexistente");
 
+//Inicio de sesión
 router.post("/login", limiteLogin, async (req, res) => {
   const { username, password } = req.body ?? {};
 
@@ -25,6 +26,7 @@ router.post("/login", limiteLogin, async (req, res) => {
     return res.status(400).json({ error: "Usuario y contraseña son obligatorios" });
   }
 
+  //Busca al usuario y revisa la contraseña
   const usuarios = getDb().collection("usuarios");
   const usuario = await usuarios.findOne({ usuario: username.trim() });
   const { valida, rehacer } = await verificarPassword(password, usuario?.passwordHash ?? HASH_FALSO);
@@ -33,12 +35,12 @@ router.post("/login", limiteLogin, async (req, res) => {
     return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
   }
 
+  //Actualiza el hash si es viejo
   if (rehacer) {
     await usuarios.updateOne({ _id: usuario._id }, { $set: { passwordHash: await hashPassword(password) } });
   }
 
-  // La región del doctor va dentro del token firmado: el servidor la usa para
-  // filtrar y nadie la puede cambiar sin invalidar la firma
+  //Crea el token con la región del doctor para que no la puedan cambiar
   const region = usuario.rol === "doctor" ? usuario.region : undefined;
   const token = jwt.sign(
     { sub: usuario.usuario, nombre: usuario.nombre, rol: usuario.rol, ...(region && { region }) },

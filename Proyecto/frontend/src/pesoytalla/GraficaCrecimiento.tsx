@@ -2,6 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { Fila } from "./cdc";
 
+//Datos que recibe la gráfica
 type Props = {
   titulo: string;
   filas: Fila[];
@@ -12,14 +13,16 @@ type Props = {
   punto: { x: number; y: number } | null; // x en las mismas unidades de la tabla
 };
 
-const pasoBonito = (bruto: number) => {
+//Redondea el paso de los números de los ejes (1, 2, 5 o 10)
+const pasoBonito =(bruto: number) => {
   const p = 10 ** Math.floor(Math.log10(bruto));
   const f = bruto / p;
   const m = f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10;
   return m * p;
 };
 
-const marcas = (min: number, max: number, n = 6) => {
+//Saca los números que se ven en los ejes
+const marcas =(min: number, max: number, n = 6) => {
   if (!(max > min)) return [min];
   const paso = pasoBonito((max - min) / n);
   const res: number[] = [];
@@ -29,6 +32,7 @@ const marcas = (min: number, max: number, n = 6) => {
   return res;
 };
 
+//Gráfica de crecimiento con las curvas de percentiles y el punto del paciente
 export const GraficaCrecimiento = ({
   titulo,
   filas,
@@ -44,10 +48,12 @@ export const GraficaCrecimiento = ({
 
   const usadas = curvas.filter((c) => filas[0].pct[c] !== undefined);
 
+  //Tamaño y márgenes de la gráfica
   const W = 640;
   const H = 380;
   const m = { t: 16, r: 44, b: 48, l: 56 };
 
+  //Valores mínimos y máximos de los ejes
   const xs = filas.map((f) => f.x / xDivisor);
   const xmin = Math.min(...xs);
   const xmax = Math.max(...xs);
@@ -60,14 +66,17 @@ export const GraficaCrecimiento = ({
   const ymin = yminBruto - margenY;
   const ymax = ymaxBruto + margenY;
 
+  //Pasa los valores a posiciones dentro de la gráfica
   const sx = (x: number) => m.l + ((x - xmin) / (xmax - xmin)) * (W - m.l - m.r);
   const sy = (y: number) =>
     H - m.b - ((y - ymin) / (ymax - ymin)) * (H - m.t - m.b);
 
-  const colorTexto = theme.palette.text.secondary;
+  //Colores de la gráfica
+  const colorTexto =theme.palette.text.secondary;
   const colorGrid = theme.palette.divider;
   const colorCurva = theme.palette.primary.main;
 
+  //Revisa si el punto del paciente cabe en la gráfica
   const px = punto ? punto.x / xDivisor : null;
   const puntoVisible =
     punto !== null && px !== null && px >= xmin && px <= xmax;
@@ -130,6 +139,7 @@ export const GraficaCrecimiento = ({
           </g>
         ))}
 
+        {/* Nombres de los ejes */}
         <text
           x={(m.l + W - m.r) / 2}
           y={H - 8}

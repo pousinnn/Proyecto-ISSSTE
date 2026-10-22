@@ -2,15 +2,14 @@
 import { AuthProvider } from "react-admin";
 import { API_URL } from "./dataProvider";
 
-// La sesión vive en el token JWT que entrega el API. Aquí no hay usuarios
-// ni contraseñas: el servidor es quien decide si las credenciales son válidas.
+//Borra el token y los datos del usuario al salir
 const limpiarSesion = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("identity");
 };
 
 export const authProvider: AuthProvider = {
-    // called when the user attempts to log in
+    //Inicia sesion mandando usuario y contraseña al servidor
     async login({ username, password }) {
         const response = await fetch(`${API_URL}/login`, {
             method: "POST",
@@ -24,31 +23,30 @@ export const authProvider: AuthProvider = {
             throw new Error(body.error ?? "Login failed");
         }
 
+        //Guarda el token y los datos del usuario
         localStorage.setItem("token", body.token);
         localStorage.setItem("identity", JSON.stringify(body.usuario));
     },
-    // called when the user clicks on the logout button
+    //Cierra la sesion
     async logout() {
         limpiarSesion();
     },
-    // called when the API returns an error
+    //Revisa los errores del servidor
     async checkError({ status }: { status: number }) {
-        // 401 = token inválido o expirado → cerrar sesión.
-        // 403 = sesión válida pero sin permiso para esa acción → no cerrar sesión.
+        //Si el token ya no sirve se cierra la sesion
         if (status === 401) {
             limpiarSesion();
             throw new Error("Session expired");
         }
     },
-    // called when the user navigates to a new location, to check for authentication
+    //Revisa que el usuario siga con sesion al cambiar de pagina
     async checkAuth() {
         const token = localStorage.getItem("token");
         if (!token) {
             throw new Error("Authentication required");
         }
 
-        // Si el token ya expiró, pedir login sin esperar a que el API falle.
-        // (Solo es comodidad: el servidor siempre vuelve a verificar la firma.)
+        //Si el token ya expiro pide iniciar sesion otra vez
         let expirado = true;
         try {
             const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
@@ -61,11 +59,13 @@ export const authProvider: AuthProvider = {
             throw new Error("Session expired");
         }
     },
+    //Regresa el rol del usuario (admin, doctor o paciente)
     getPermissions: async () => {
         const identity = JSON.parse(localStorage.getItem("identity") ?? "null");
         return identity?.rol;
     },
 
+    //Regresa los datos del usuario que inicio sesion
     getIdentity: async () => {
         const identity = JSON.parse(localStorage.getItem("identity") ?? "null");
 

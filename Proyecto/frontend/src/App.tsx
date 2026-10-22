@@ -41,6 +41,7 @@ import { ChildCare } from "@mui/icons-material";
 import { Historial } from "./historial/Historial";
 import { History } from "@mui/icons-material";
 
+//Cambia el idioma entre español e ingles
 const i18nProvider = polyglotI18nProvider(
     (locale) => {
         if (locale === "en") {
@@ -57,6 +58,7 @@ const i18nProvider = polyglotI18nProvider(
 );
 
 
+//Aplicacion principal con todas las paginas
 export const App = () =>(
     <Admin layout = {MyLayout}
     //loginPage = {MyLoginPage} 
@@ -64,6 +66,7 @@ export const App = () =>(
     authProvider={authProvider}
     dashboard={Dashboard}
     i18nProvider={i18nProvider}>
+        {/* USUARIOS */}
         <Resource name="users" create={UserCreate} />
         {/* RESULTADOS */}
         <Resource name="resultados" list={Resultados} icon={Assessment} />
@@ -80,7 +83,7 @@ export const App = () =>(
         {/* HISTORIAL */}
         <Resource name="historial" list={Historial} icon={History} />
 
-        {/* PADRON: solo doctor y admin (el servidor también lo bloquea para pacientes) */}
+        {/* PADRON solo lo ven doctor y admin */}
         {(permissions: string) =>
             permissions === "admin" || permissions === "doctor"
                 ? <Resource name="infantes" list={PadronList} show={PadronShow} icon={ChildCare} />

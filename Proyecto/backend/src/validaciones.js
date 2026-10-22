@@ -8,17 +8,20 @@ export class ErrorValidacion extends Error {
   }
 }
 
+//Opciones que se permiten
 const SEXOS = ["niño", "niña"];
 const PERIODOS = ["2026-1", "2026-2", "2027-1"];
 
-const elegir = (valor, opciones, campo) => {
+//Revisa que el valor sea una de las opciones
+const elegir =(valor, opciones, campo) => {
   if (!opciones.includes(valor)) {
     throw new ErrorValidacion(`${campo} debe ser uno de: ${opciones.join(", ")}`);
   }
   return valor;
 };
 
-const numeroPositivo = (valor, campo) => {
+//Revisa que sea un número mayor a 0
+const numeroPositivo =(valor, campo) => {
   const n = Number(valor);
   if (typeof valor === "boolean" || valor === "" || valor === null || !Number.isFinite(n) || n <= 0) {
     throw new ErrorValidacion(`${campo} debe ser un número mayor a 0`);
@@ -26,21 +29,24 @@ const numeroPositivo = (valor, campo) => {
   return n;
 };
 
-const enRango = (valor, min, max, campo) => {
+//Revisa que el número esté entre el mínimo y el máximo
+const enRango =(valor, min, max, campo) => {
   if (valor < min || valor > max) {
     throw new ErrorValidacion(`${campo} fuera de rango (${min} a ${max})`);
   }
   return valor;
 };
 
-const texto = (valor, campo, max = 100) => {
+//Revisa que el texto no venga vacío ni muy largo
+const texto =(valor, campo, max = 100) => {
   if (typeof valor !== "string" || valor.trim() === "" || valor.length > max) {
     throw new ErrorValidacion(`${campo} es obligatorio (máximo ${max} caracteres)`);
   }
   return valor.trim();
 };
 
-const fechaPasada = (valor, campo) => {
+//Revisa que la fecha sea válida y no sea del futuro
+const fechaPasada =(valor, campo) => {
   if (typeof valor !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
     throw new ErrorValidacion(`${campo} debe tener formato AAAA-MM-DD`);
   }
@@ -51,12 +57,15 @@ const fechaPasada = (valor, campo) => {
   return valor;
 };
 
+//Deja el número con 2 decimales
 const redondear = (n) => Number(n.toFixed(2));
 
+//Pasa la medida a centímetros
 const aCm = (valor, unidad) =>
   ({ mm: valor / 10, cm: valor, m: valor * 100, in: valor * 2.54 })[unidad];
 
-const edadEnMeses = (fechaNacimiento) => {
+//Calcula la edad en meses
+const edadEnMeses =(fechaNacimiento) => {
   const nacimiento = new Date(`${fechaNacimiento}T00:00:00`);
   const hoy = new Date();
   let meses =
@@ -66,6 +75,7 @@ const edadEnMeses = (fechaNacimiento) => {
 };
 
 
+//Datos que llevan todas las mediciones
 const comunes = (d) => ({
   sexo: elegir(d.sexo, SEXOS, "sexo"),
   periodo: elegir(d.periodo, PERIODOS, "periodo"),
@@ -73,7 +83,9 @@ const comunes = (d) => ({
   zona: texto(d.zona, "zona"),
 });
 
+//Validaciones de cada tipo de medición
 export const validadores = {
+  //Peso y talla, también calcula la edad y el imc
   pesoytalla(d) {
     const fechaNacimiento = fechaPasada(d.fechaNacimiento, "fechaNacimiento");
     const unidadAltura = elegir(d.unidadAltura, ["cm", "m"], "unidadAltura");
@@ -100,6 +112,7 @@ export const validadores = {
     };
   },
 
+  //Talla blanco con la altura del papá y la mamá
   tallablanca(d) {
     const base = comunes(d);
     const unidadPadre = elegir(d.unidadPadre, ["cm", "m", "in"], "unidadPadre");
@@ -124,6 +137,7 @@ export const validadores = {
     };
   },
 
+  //Perímetro de la cabeza
   perimetrocefalico(d) {
     const unidad = elegir(d.unidad, ["cm", "mm", "m", "in"], "unidad");
     const perimetro = numeroPositivo(d.perimetro, "perimetro");

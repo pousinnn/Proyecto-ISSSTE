@@ -46,12 +46,14 @@ import {
 
 type Sexo = "niño" | "niña";
 
+//Lo que se muestra al calcular
 type Resultado = {
   edad: string;
   imc: number;
   evaluacion: Evaluacion | null;
 };
 
+//Pantalla de peso y talla del paciente
 export const PesoYTalla = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -59,6 +61,7 @@ export const PesoYTalla = () => {
   // Traducciones de React Admin
   const translate = useTranslate();
 
+  //Para mostrar avisos y guardar en la base de datos
   const notify = useNotify();
   const [create, { isPending }] = useCreate();
 
@@ -122,6 +125,7 @@ export const PesoYTalla = () => {
       return null;
     }
 
+    //Revisa que la altura y el peso sean números válidos
     const alturaNumero = Number(altura);
     const pesoNumero = Number(peso);
 
@@ -139,6 +143,7 @@ export const PesoYTalla = () => {
       return null;
     }
 
+    //Pasa la altura a metros y el peso a kg
     const alturaMetros =
       unidadAltura === "cm"
         ? alturaNumero / 100
@@ -203,6 +208,7 @@ export const PesoYTalla = () => {
 
     if (!datos) return;
 
+    //Datos que se mandan a la base de datos
     const registro = {
       region,
       paciente,
@@ -267,6 +273,7 @@ export const PesoYTalla = () => {
   // Colores dinámicos
   const labelColor = isDark ? "#e9ff75" : "#748c1f";
 
+  //Estilo de los campos de texto
   const inputStyle = {
     "& .MuiInputBase-root": {
       bgcolor: "action.hover",
@@ -279,6 +286,7 @@ export const PesoYTalla = () => {
     },
   };
 
+  //Evaluación y sexo para las gráficas
   const evaluacion = resultado?.evaluacion ?? null;
   const k = codigoSexo(sexo);
 
@@ -337,6 +345,7 @@ export const PesoYTalla = () => {
             {/* COLUMNA IZQUIERDA */}
 
             <Grid size={{ xs: 12, md: 7 }}>
+              {/* INSTRUCCIONES */}
               <Typography
                 className="peso-section"
                 sx={{
@@ -434,6 +443,7 @@ export const PesoYTalla = () => {
             {/* COLUMNA DERECHA */}
 
             <Grid size={{ xs: 12, md: 5 }}>
+              {/* PERIODO */}
               <Typography
                 className="peso-section"
                 sx={{
@@ -618,6 +628,7 @@ export const PesoYTalla = () => {
                 {resultado.imc.toFixed(2)} kg/m²
               </Typography>
 
+              {/* Percentiles del CDC (comparación con otros niños de su edad) */}
               {evaluacion && (
                 <>
                   {lineaIndicador(

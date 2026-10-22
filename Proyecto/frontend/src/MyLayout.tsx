@@ -45,7 +45,7 @@ const MyUserMenu = () => (
     </UserMenu>
 );
 
-// Botones de la derecha: nuevo usuario + los que ya tenías (idioma, tema, refrescar)
+// Botones de arriba a la derecha (nuevo usuario, idioma y tema)
 const MyToolbar = () => (
     <>
         <BotonNuevoUsuario />

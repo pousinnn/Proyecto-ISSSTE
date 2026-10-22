@@ -1,9 +1,4 @@
-// Padrón de infantes (los datos llegan con `npm run importar-padron`).
-//   GET /api/infantes?_start=0&_end=10&_sort=paterno&_order=ASC&q=texto&ebdi=12&activo=1&region=Sur
-//   GET /api/infantes/:id_infante
-//   PUT /api/infantes/:id_infante/region   { region }   (solo admin; único dato editable)
-// Acceso: admin y doctor (se aplica en server.js). Un paciente nunca ve el padrón:
-// tiene CURP y datos personales de todos los niños.
+//Rutas del padrón de infantes, solo para admin y doctor
 import { Router } from "express";
 import { getDb } from "../db.js";
 import { escaparRegex, filtroAcceso } from "./mediciones.js";
@@ -14,30 +9,34 @@ import { ErrorValidacion } from "../validaciones.js";
 const router = Router();
 const coleccion = () => getDb().collection("infantes");
 
-// Para react-admin el id es id_infante (el mismo número que en MySQL)
+//Usa id_infante como id para la página de admin
 const aCliente = ({ _id, ...doc }) => ({ id: doc.id_infante, ...doc });
 
+//Campos por los que se puede ordenar
 const CAMPOS_ORDENABLES = ["id", "id_infante", "paterno", "nombre", "fnac", "ebdi", "freg"];
 
+//Lista de infantes con filtros y páginas
 router.get("/", async (req, res) => {
   const { _start = "0", _end = "10", _sort = "paterno", _order = "ASC", q, ebdi, activo, region, id } = req.query;
 
   const filtro = {};
-  // getMany de react-admin: ?id=1&id=2
+  //Busca varios infantes por id
   if (id !== undefined) {
     filtro.id_infante = { $in: [id].flat().map(Number).filter(Number.isInteger) };
   }
-  // Filtros exactos: se convierten a número, así no se puede inyectar un objeto
+  //Filtros, se pasan a número para que sean seguros
   if (typeof ebdi === "string" && /^\d+$/.test(ebdi)) filtro.ebdi = Number(ebdi);
   if (activo === "0" || activo === "1") filtro.activo = Number(activo);
   if (typeof region === "string" && REGIONES.includes(region)) filtro.region = region;
 
+  //Búsqueda por nombre, apellidos o CURP
   if (typeof q === "string" && q.trim()) {
     const re = new RegExp(escaparRegex(q.trim()), "i");
     filtro.$or = [{ nombre: re }, { paterno: re }, { materno: re }, { curp: re }];
   }
-  // Al final: el doctor solo ve infantes de su región, pida lo que pida en la URL
+  //El doctor solo ve los infantes de su región
   Object.assign(filtro, filtroAcceso(req.usuario));
+  //Orden y páginas
 
   const campo = CAMPOS_ORDENABLES.includes(_sort) ? (_sort === "id" ? "id_infante" : _sort) : "paterno";
   const inicio = Math.max(0, Number.parseInt(_start, 10) || 0);
@@ -56,14 +55,16 @@ router.get("/", async (req, res) => {
   res.set("X-Total-Count", String(total)).json(docs.map(aCliente));
 });
 
+//Ver un infante por su id
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  // 404 (no 403) si es de otra región: así ni siquiera se revela que existe
+  //Si es de otra región dice que no existe
   const doc = Number.isInteger(id) && (await coleccion().findOne({ id_infante: id, ...filtroAcceso(req.usuario) }));
   if (!doc) return res.status(404).json({ error: "No encontrado" });
   res.json(aCliente(doc));
 });
 
+//Cambia la región de un infante, solo admin
 router.put("/:id/region", requiereRol("admin"), async (req, res) => {
   const id = Number(req.params.id);
   const region = req.body?.region;

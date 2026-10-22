@@ -39,6 +39,7 @@ import { SelectorRegion } from "../SelectorRegion";
 type Sexo = "niño" | "niña";
 type Unidad = "cm" | "m" | "in";
 
+//Pantalla de talla blanco (la estatura que se espera según los papás)
 export const TallaBlanca = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -47,6 +48,7 @@ export const TallaBlanca = () => {
   const translate = useTranslate();
   const t = (key: string) => translate(`custom.${key}`);
 
+  //Para mostrar avisos y guardar en la base de datos
   const notify = useNotify();
   const [create, { isPending }] = useCreate();
 
@@ -102,6 +104,7 @@ export const TallaBlanca = () => {
       return null;
     }
 
+    //Pasa las alturas a centímetros
     const padreCm = convertirACm(padre, unidadPadre);
     const madreCm = convertirACm(madre, unidadMadre);
 
@@ -145,6 +148,7 @@ export const TallaBlanca = () => {
 
     if (!datos) return;
 
+    //Datos que se mandan a la base de datos
     const registro = {
       region,
       paciente,
@@ -184,6 +188,7 @@ export const TallaBlanca = () => {
   // Estilos que responden al tema
   const labelColor = isDark ? "#e9ff75" : "#748c1f";
 
+  //Estilo de los campos de texto
   const inputStyle = {
     "& .MuiInputBase-root": {
       bgcolor: "action.hover",

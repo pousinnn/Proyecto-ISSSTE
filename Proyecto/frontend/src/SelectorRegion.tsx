@@ -3,9 +3,7 @@ import { MenuItem, TextField, Typography, SxProps, Theme } from "@mui/material";
 import { useGetIdentity, useTranslate } from "react-admin";
 import { REGIONES } from "./regiones";
 
-// Selector de región para los formularios de captura.
-// Si quien captura es un doctor, la región queda fija en la suya
-// (el servidor también la fuerza, esto solo evita confusiones en pantalla).
+//Selector de region, si es doctor se queda fija en su region
 type Props = {
     value: string;
     onChange: (value: string) => void;
@@ -15,9 +13,11 @@ type Props = {
 
 export const SelectorRegion = ({ value, onChange, className, inputSx }: Props) => {
     const translate = useTranslate();
+    //Saca la region del doctor que inicio sesion
     const { data: identity } = useGetIdentity();
     const regionFija = identity?.rol === "doctor" ? (identity.region as string | undefined) : undefined;
 
+    //Pone la region del doctor automaticamente
     useEffect(() => {
         if (regionFija && value !== regionFija) onChange(regionFija);
     }, [regionFija, value, onChange]);
@@ -31,6 +31,7 @@ export const SelectorRegion = ({ value, onChange, className, inputSx }: Props) =
                 {translate("custom.common.region", { _: "Región" })}
             </Typography>
 
+            {/* MENU DE REGIONES */}
             <TextField
                 select
                 fullWidth
