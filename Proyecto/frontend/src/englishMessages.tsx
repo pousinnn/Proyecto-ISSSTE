@@ -433,6 +433,9 @@ const englishMessages: TranslationMessages = {
       calculate: "Calculate",
       convert: "Convert",
       search: "Search",
+      patientAge: "Patient Age",
+      years: "Years",
+      months: "Months",   
     },
 
     //PESO Y TALLA

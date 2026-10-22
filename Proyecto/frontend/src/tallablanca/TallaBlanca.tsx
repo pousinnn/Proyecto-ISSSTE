@@ -237,7 +237,7 @@ export const TallaBlanca = () => {
                   color: "text.primary",
                 }}
               >
-                014121305
+              
               </Typography>
             </Box>
 

@@ -41,6 +41,10 @@ import { ChildCare } from "@mui/icons-material";
 import { Historial } from "./historial/Historial";
 import { History } from "@mui/icons-material";
 
+//HISTORIAL NUTRICION
+import { HistorialNutricion } from "./historialnutricion/HistorialNutricion";
+import { Restaurant } from "@mui/icons-material";
+
 //Cambia el idioma entre español e ingles
 const i18nProvider = polyglotI18nProvider(
     (locale) => {
@@ -82,6 +86,9 @@ export const App = () =>(
 
         {/* HISTORIAL */}
         <Resource name="historial" list={Historial} icon={History} />
+
+        {/* HISTORIAL NUTRICION */}
+        <Resource name="historialnutricion" list={HistorialNutricion} icon={Restaurant} />
 
         {/* PADRON solo lo ven doctor y admin */}
         {(permissions: string) =>
