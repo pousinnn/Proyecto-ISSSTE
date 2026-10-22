@@ -7,6 +7,7 @@ import {
   DateField,
   //FunctionField,
   DeleteButton,
+  usePermissions,
   useTranslate,
   useRecordContext,
 } from "react-admin";
@@ -241,6 +242,7 @@ const HistorialFilters = () => {
 // COMPONENTE PRINCIPAL
 export const Historial = () => {
   const translate = useTranslate();
+  const { permissions } = usePermissions();
 
   return (
     <Box
@@ -333,10 +335,13 @@ export const Historial = () => {
                   render={() => (
                     <Stack direction="row" spacing={1}>
                       <VerDetalles />
-                      <DeleteButton
-                        mutationMode="pessimistic"
-                        redirect={false}
-                      />
+                      {/* Solo admin puede borrar (el servidor también lo valida) */}
+                      {permissions === "admin" && (
+                        <DeleteButton
+                          mutationMode="pessimistic"
+                          redirect={false}
+                        />
+                      )}
                     </Stack>
                   )}
                 />
