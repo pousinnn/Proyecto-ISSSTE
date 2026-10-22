@@ -454,6 +454,10 @@ const spanishMessages: TranslationMessages = {
         title: "Crear usuario",
         name: "Nombre",
         email: "Correo electrónico",
+        username: "Usuario",
+        usernameHelp: "Con este dato inicia sesión (ej. dr.luis o una matrícula)",
+        usernameInvalid: "De 3 a 50 caracteres: letras, números, punto, guion o guion bajo",
+        patientData: "Datos del padrón",
         password: "Contraseña",
         role: "Rol",
         roles: {

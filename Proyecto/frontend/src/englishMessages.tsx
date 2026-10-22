@@ -480,6 +480,10 @@ const englishMessages: TranslationMessages = {
         title: "Create user",
         name: "Name",
         email: "Email",
+        username: "Username",
+        usernameHelp: "Used to sign in (e.g. dr.luis or an ID number)",
+        usernameInvalid: "3 to 50 characters: letters, numbers, dot, dash or underscore",
+        patientData: "Registry data",
         password: "Password",
         role: "Role",
         roles: {
