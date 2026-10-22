@@ -3,7 +3,7 @@ import { Router } from "express";
 import { ObjectId } from "mongodb";
 import { getDb } from "../db.js";
 import { requiereRol } from "../middleware/auth.js";
-import { aCliente, escaparRegex, filtroAcceso } from "./mediciones.js";
+import { aCliente, escaparRegex, filtroAcceso, ROLES_QUE_EDITAN, exigirEbdiEstancia } from "./mediciones.js";
 
 //Acomoda y estrae los resultados de la base de datos
 const FUENTES = {
@@ -97,13 +97,17 @@ export const rutasHistorial = rutaListado(({ fechaOrden, contenido, ...fila }) =
   resultado: contenido,
 }));
 
-//Borra un registro del historial, solo admin
-rutasHistorial.delete("/:id", requiereRol("admin"), async (req, res) => {
+//Borra un registro del historial: admin todos, coordinador su región, estancia su EBDI
+rutasHistorial.delete("/:id", requiereRol(...ROLES_QUE_EDITAN), async (req, res) => {
   const [tipo, idTexto] = req.params.id.split("-");
   if (!(tipo in FUENTES) || !ObjectId.isValid(idTexto)) {
     return res.status(404).json({ error: "No encontrado" });
   }
-  const doc = await getDb().collection(tipo).findOneAndDelete({ _id: new ObjectId(idTexto) });
+  exigirEbdiEstancia(req.usuario);
+  //Si no es de su región o estancia dice que no existe
+  const doc = await getDb()
+    .collection(tipo)
+    .findOneAndDelete({ _id: new ObjectId(idTexto), ...(await filtroAcceso(req.usuario)) });
   if (!doc) return res.status(404).json({ error: "No encontrado" });
   res.json({ id: req.params.id });
 });

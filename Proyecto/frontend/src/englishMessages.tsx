@@ -490,6 +490,9 @@ const englishMessages: TranslationMessages = {
         actions: "Actions",
         view: "View",
         details: "Record Details",
+        edit: "Edit",
+        editTitle: "Edit record",
+        updated: "Record updated successfully",
     },
     //USUARIOS
     users: {

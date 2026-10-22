@@ -464,6 +464,9 @@ const spanishMessages: TranslationMessages = {
         actions: "Acciones",
         view: "Ver",
         details: "Detalles del registro",
+        edit: "Editar",
+        editTitle: "Editar registro",
+        updated: "Registro actualizado correctamente",
     },
     //USUARIOS
     users: {

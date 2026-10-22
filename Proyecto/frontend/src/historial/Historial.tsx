@@ -29,6 +29,7 @@ import {
 import { Visibility } from "@mui/icons-material";
 
 import "./Historial.css";
+import { EditarMedicion } from "./EditarMedicion";
 
 // TIPO DE REGISTRO
 const TipoField = () => {
@@ -172,6 +173,8 @@ export const Historial = () => {
 
   // Solo el administrador puede eliminar registros
   const { permissions } = usePermissions();
+  //Roles que pueden editar y borrar (el servidor revisa que sea de su región o EBDI)
+  const puedeEditar = ["admin", "coordinador", "estancia"].includes(permissions);
 
   const filters = [
     <SearchInput
@@ -281,7 +284,9 @@ export const Historial = () => {
                   <Stack direction="row" spacing={1}>
                     <VerDetalles />
 
-                    {permissions === "admin" && (
+                    {/* Editar y borrar: admin, coordinador (su región) y estancia (su EBDI) */}
+                    {puedeEditar && <EditarMedicion />}
+                    {puedeEditar && (
                       <DeleteButton
                         mutationMode="pessimistic"
                         redirect={false}

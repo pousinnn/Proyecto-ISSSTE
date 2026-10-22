@@ -53,8 +53,11 @@ export const filtroAcceso = async (usuario) => {
   return { _id: { $exists: false } };
 };
 
+//Roles que pueden corregir o borrar mediciones (cada uno dentro de su alcance)
+export const ROLES_QUE_EDITAN = [ROLES.ADMIN, ROLES.COORDINADOR, ROLES.ESTANCIA];
+
 //La estancia necesita tener su EBDI asignada
-const exigirEbdiEstancia = (usuario) => {
+export const exigirEbdiEstancia = (usuario) => {
   if (usuario.rol === ROLES.ESTANCIA && !usuario.ebdi) {
     throw errorCon(403, "No tienes una estancia (EBDI) asignada; pide a un administrador que te la asigne");
   }
@@ -163,8 +166,8 @@ export function rutasMediciones(nombre) {
     res.status(201).json(aCliente({ _id: insertedId, ...doc }));
   });
 
-  //Edita una medición
-  router.put("/:id", requiereRol(ROLES.ADMIN, ROLES.ESTANCIA), async (req, res) => {
+  //Edita una medición: admin todas, coordinador su región, estancia su EBDI
+  router.put("/:id", requiereRol(...ROLES_QUE_EDITAN), async (req, res) => {
     const _id = idValido(req.params.id);
     if (!_id) return res.status(404).json({ error: "No encontrado" });
 
@@ -192,10 +195,12 @@ export function rutasMediciones(nombre) {
     res.json(aCliente(doc));
   });
 
-  //Borra una medición, solo admin
-  router.delete("/:id", requiereRol(ROLES.ADMIN), async (req, res) => {
+  //Borra una medición: admin todas, coordinador su región, estancia su EBDI
+  router.delete("/:id", requiereRol(...ROLES_QUE_EDITAN), async (req, res) => {
     const _id = idValido(req.params.id);
-    const doc = _id && (await coleccion().findOneAndDelete({ _id }));
+    exigirEbdiEstancia(req.usuario);
+    //Si no es de su región o estancia dice que no existe
+    const doc = _id && (await coleccion().findOneAndDelete({ _id, ...(await filtroAcceso(req.usuario)) }));
     if (!doc) return res.status(404).json({ error: "No encontrado" });
     res.json(aCliente(doc));
   });
