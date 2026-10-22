@@ -6,6 +6,7 @@ import { REGIONES } from "../src/regiones.js";
 const ROLES = ["admin", "doctor", "paciente"];
 const [usuario, nombre, password, rol = "paciente", region] = process.argv.slice(2);
 
+//Revisa los datos antes de crear el usuario
 if (!usuario || !nombre || !password) {
   console.error(`Uso: npm run crear-usuario -- <usuario> "<Nombre completo>" <contraseña> [${ROLES.join("|")}] ["<región>" si es doctor]`);
   process.exit(1);
@@ -24,6 +25,7 @@ if (!ROLES.includes(rol)) {
 }
 
 
+//Guarda el usuario con la contraseña en hash, si ya existe lo actualiza
 const db = await conectar();
 const passwordHash = await hashPassword(password);
 

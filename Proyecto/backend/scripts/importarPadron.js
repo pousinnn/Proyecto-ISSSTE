@@ -1,11 +1,4 @@
-// Importa el padrón de MySQL (archivo .sql de mysqldump) a la colección `infantes`.
-//
-// Uso:
-//   npm run importar-padron -- <archivo.sql>             → solo revisa (no guarda nada)
-//   npm run importar-padron -- <archivo.sql> --aplicar   → guarda en MongoDB
-//
-// Si un infante ya existe (mismo id_infante) se reemplaza con la versión del archivo,
-// así que se puede correr varias veces sin duplicar.
+//Pasa el padrón de MySQL a mongodb, con --aplicar sí lo guarda
 import { readFileSync } from "node:fs";
 import { conectar, desconectar } from "../src/db.js";
 import { filaAInfante, COLUMNAS_CONOCIDAS } from "../src/infantes/mapeo.js";
@@ -18,9 +11,7 @@ if (!archivo) {
   process.exit(1);
 }
 
-// --- 1. Leer el archivo -------------------------------------------------------
-// mysqldump normalmente escribe en UTF-8, pero la tabla original es latin1.
-// Si el archivo no es UTF-8 válido, se lee como latin1 para no romper ñ y acentos.
+//Lee el archivo cuidando las ñ y los acentos
 const bytes = readFileSync(archivo);
 let sql;
 try {
@@ -30,7 +21,7 @@ try {
   console.log("Aviso: el archivo no es UTF-8, se leyó como latin1.");
 }
 
-// --- 2. Sacar el orden de las columnas del CREATE TABLE ------------------------
+//Saca las columnas de la tabla
 const create = sql.match(/CREATE TABLE `padron` \(([\s\S]*?)\n\)/);
 if (!create) {
   console.error("No encontré `CREATE TABLE `padron`` en el archivo.");
@@ -38,16 +29,16 @@ if (!create) {
 }
 const columnasTabla = [...create[1].matchAll(/^\s*`(\w+)`/gm)].map((m) => m[1]);
 
+//Avisa si hay columnas que no conocemos
 const desconocidas = columnasTabla.filter((c) => !COLUMNAS_CONOCIDAS.has(c));
 if (desconocidas.length) {
   console.log(`Aviso: estas columnas no están en el mapeo y se van a ignorar: ${desconocidas.join(", ")}`);
 }
 
-// --- 3. Leer los INSERT INTO `padron` ... VALUES (...),(...); -------------------
-// Lector carácter por carácter que entiende textos entre comillas con escapes
-// de MySQL (\' \\ \n etc.), NULL y números.
+//Caracteres especiales de MySQL
 const ESCAPES = { 0: "\0", n: "\n", r: "\r", t: "\t", Z: "\x1a", b: "\b" };
 
+//Lee los valores de los INSERT letra por letra
 function leerValores(texto, inicio) {
   const filas = [];
   let i = inicio;
@@ -65,6 +56,7 @@ function leerValores(texto, inicio) {
     const fila = [];
     while (true) {
       saltarEspacios();
+      //Lee un texto entre comillas
       if (texto[i] === "'") {
         let valor = "";
         i++;
@@ -83,6 +75,7 @@ function leerValores(texto, inicio) {
         i++;
         fila.push(valor);
       } else {
+        //Lee un número o NULL
         let token = "";
         while (texto[i] !== "," && texto[i] !== ")") token += texto[i++];
         token = token.trim();
@@ -98,11 +91,12 @@ function leerValores(texto, inicio) {
   throw new Error("El archivo terminó a mitad de un INSERT");
 }
 
+//Busca todos los INSERT del padrón y arma los renglones
 const filas = [];
 const reInsert = /INSERT INTO `padron`(?:\s*\(([^)]*)\))?\s*VALUES\s*/g;
 let m;
 while ((m = reInsert.exec(sql))) {
-  // Si el INSERT trae su propia lista de columnas, se usa esa
+  //Si el INSERT trae sus columnas se usan esas
   const columnas = m[1] ? m[1].split(",").map((c) => c.trim().replace(/`/g, "")) : columnasTabla;
   const { filas: valores, fin } = leerValores(sql, reInsert.lastIndex);
   for (const v of valores) {
@@ -122,10 +116,10 @@ if (filas.length === 0) {
   process.exit(0);
 }
 
-// --- 4. Convertir ----------------------------------------------------------------
+//Convierte los renglones a infantes
 const docs = filas.map(filaAInfante);
 
-// Muestra de un registro, con el CURP tapado (es dato personal)
+//Muestra un ejemplo con el CURP tapado
 const ejemplo = { ...docs[0] };
 if (ejemplo.curp) ejemplo.curp = `${ejemplo.curp.slice(0, 4)}**************`;
 ejemplo.inscripciones = `{ ${Object.keys(docs[0].inscripciones).length} meses }`;
@@ -137,24 +131,23 @@ if (!aplicar) {
   process.exit(0);
 }
 
-// --- 5. Guardar ---------------------------------------------------------------------
+//Guarda en mongodb
 const db = await conectar();
-// $set (y no replace): actualiza solo los campos que vienen de MySQL, así no se
-// borran los que se asignan en la app (por ejemplo `region`) al volver a importar.
+//Solo actualiza los campos de MySQL para no borrar la región
 const operaciones = docs.map((doc) => ({
   updateOne: { filter: { id_infante: doc.id_infante }, update: { $set: doc }, upsert: true },
 }));
 
 let guardados = 0;
 const errores = [];
-// En bloques de 1000 para no mandar todo de golpe; ordered:false = si uno
-// falla, los demás se siguen guardando
+//Guarda de 1000 en 1000 y si uno falla sigue con los demás
 for (let k = 0; k < operaciones.length; k += 1000) {
   try {
     const r = await db.collection("infantes").bulkWrite(operaciones.slice(k, k + 1000), { ordered: false });
-    // upserted = nuevos; matched = ya existían y se actualizaron
+    //Cuenta los nuevos y los actualizados
     guardados += r.upsertedCount + r.matchedCount;
   } catch (e) {
+    //Guarda cuáles fallaron y por qué
     const r = e.result;
     if (r) guardados += r.upsertedCount + r.matchedCount;
     for (const err of e.writeErrors ?? []) {
@@ -166,6 +159,7 @@ for (let k = 0; k < operaciones.length; k += 1000) {
   }
 }
 
+//Muestra el resumen
 console.log(`\nGuardados: ${guardados} · Con error: ${errores.length}`);
 for (const e of errores.slice(0, 20)) console.log("  - " + e);
 if (errores.length > 20) console.log(`  ... y ${errores.length - 20} más`);

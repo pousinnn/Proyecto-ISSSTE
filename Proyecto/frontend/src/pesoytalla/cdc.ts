@@ -4,7 +4,7 @@ import wtstatRaw from "./cdc/wtstat.csv?raw";
 import bmiagerevRaw from "./cdc/bmiagerev.csv?raw";
 
 //Tipos de datos que usamos en los cálculos
-export type SexoCDC ="niño" | "niña";
+export type SexoCDC = "niño" | "niña";
 export type Nivel = "success" | "info" | "warning" | "error";
 
 export type Fila = {
@@ -56,7 +56,7 @@ export const codigoSexo = (sexo: SexoCDC): 1 | 2 => (sexo === "niño" ? 1 : 2);
 /* ---------- Lectura de CSV ---------- */
 
 //Lee el archivo CSV y separa las filas de niños y niñas
-const parsearCsv =(crudo: string, clavesX: string[]): TablaCDC => {
+const parsearCsv = (crudo: string, clavesX: string[]): TablaCDC => {
   const tabla: TablaCDC = { 1: [], 2: [] };
 
   const lineas = crudo
@@ -214,7 +214,7 @@ export const edadEnMeses = (fechaISO: string, hoy: Date = new Date()) => {
 };
 
 //Saca el percentil y la categoría de una medida
-const construirIndicador =(
+const construirIndicador = (
   filas: Fila[],
   x: number,
   valor: number,
@@ -242,7 +242,7 @@ const construirIndicador =(
 };
 
 //Evalúa la talla, el peso y el IMC del paciente
-export const evaluarCrecimiento =(
+export const evaluarCrecimiento = (
   tablas: TablasCDC,
   sexo: SexoCDC,
   fechaNacimiento: string,
@@ -281,7 +281,7 @@ export const evaluarCrecimiento =(
 };
 
 //Regresa el resultado más grave de los tres
-export const severidadGeneral =(ev: Evaluacion | null): Nivel => {
+export const severidadGeneral = (ev: Evaluacion | null): Nivel => {
   const niveles = [ev?.imcEdad, ev?.tallaEdad, ev?.pesoTalla].map(
     (i) => i?.nivel
   );

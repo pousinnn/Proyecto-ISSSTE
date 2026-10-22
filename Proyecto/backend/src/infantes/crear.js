@@ -1,17 +1,16 @@
-// Alta de un infante desde la app (al crear una cuenta de paciente).
-// Valida lo que llega del formulario y arma el documento completo del padrón,
-// con las mismas columnas que la tabla MySQL.
+//Crea un infante nuevo en el padrón cuando se registra un paciente
 import { ErrorValidacion } from "../validaciones.js";
 import { REGIONES } from "../regiones.js";
 import { CAMPOS, COLUMNAS_MES, COLUMNAS_SIN_FECHA } from "./mapeo.js";
 
-// Rango de id_infante para los creados en la app: no choca con el padrón real
-// de MySQL (llega a ~199409) ni con los datos demo (900001 en adelante).
+//Rango de ids para los infantes creados en la app
 export const ID_APP_MIN = 500001;
 export const ID_APP_MAX = 899999;
 
+//Formato del CURP
 const CURP = /^[A-Z]{4}\d{6}[HMX][A-Z]{5}[A-Z0-9]\d$/;
 
+//Revisa un texto
 const texto = (v, campo, { max, obligatorio = false } = {}) => {
   if (v === undefined || v === null || v === "") {
     if (obligatorio) throw new ErrorValidacion(`${campo} es obligatorio`);
@@ -24,6 +23,7 @@ const texto = (v, campo, { max, obligatorio = false } = {}) => {
   return t;
 };
 
+//Revisa un número entero
 const entero = (v, campo, { min = 0, max = 2147483647, obligatorio = false } = {}) => {
   if (v === undefined || v === null || v === "") {
     if (obligatorio) throw new ErrorValidacion(`${campo} es obligatorio`);
@@ -36,6 +36,7 @@ const entero = (v, campo, { min = 0, max = 2147483647, obligatorio = false } = {
   return n;
 };
 
+//Revisa una fecha
 const fecha = (v, campo, { obligatorio = false } = {}) => {
   if (v === undefined || v === null || v === "") {
     if (obligatorio) throw new ErrorValidacion(`${campo} es obligatoria`);
@@ -49,12 +50,14 @@ const fecha = (v, campo, { obligatorio = false } = {}) => {
   return f;
 };
 
+//Valida los datos y arma el infante
 export function construirInfante(d, { idInfante, creadoPor }) {
   if (!d || typeof d !== "object" || Array.isArray(d)) {
     throw new ErrorValidacion("Faltan los datos del padrón del paciente");
   }
   const hoy = new Date();
 
+  //Revisa que sea menor de 18 años
   const fnac = fecha(d.fnac, "Fecha de nacimiento", { obligatorio: true });
   if (fnac > hoy) throw new ErrorValidacion("La fecha de nacimiento no puede ser futura");
   const edadAnios = (hoy - fnac) / (365.25 * 86400000);
@@ -63,6 +66,7 @@ export function construirInfante(d, { idInfante, creadoPor }) {
   const freg = fecha(d.freg, "Fecha de registro") ?? new Date(Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate()));
   if (freg < fnac || freg > hoy) throw new ErrorValidacion("La fecha de registro debe estar entre el nacimiento y hoy");
 
+  //Revisa CURP, género y región
   const curp = texto(d.curp, "CURP", { obligatorio: true }).toUpperCase();
   if (!CURP.test(curp)) throw new ErrorValidacion("El CURP no tiene un formato válido (18 caracteres)");
 
@@ -75,12 +79,13 @@ export function construirInfante(d, { idInfante, creadoPor }) {
 
   const discapacidad = d.discapacidad === true || d.discapacidad === 1 ? 1 : 0;
 
-  // Todas las columnas del padrón con su valor por defecto, como en MySQL
+  //Pone todos los campos con su valor por defecto
   const doc = {};
   for (const c of CAMPOS.ENTEROS) doc[c] = 0;
   for (const c of [...CAMPOS.FECHAS, ...CAMPOS.FECHA_HORA]) doc[c] = null;
   for (const c of CAMPOS.TEXTOS) doc[c] = "";
 
+  //Llena los datos del formulario
   Object.assign(doc, {
     id_infante: idInfante,
     id_benef_infante: entero(d.id_benef_infante, "ID de beneficiario", { max: 99999 }),
@@ -106,7 +111,7 @@ export function construirInfante(d, { idInfante, creadoPor }) {
     region: d.region,
   });
 
-  // Inscrito desde el mes de registro hasta hoy; meses futuros sin dato
+  //Marca los meses inscritos desde el registro hasta hoy
   doc.inscripciones = {};
   for (const mes of Object.values(COLUMNAS_MES)) {
     const [a, m] = mes.split("-").map(Number);

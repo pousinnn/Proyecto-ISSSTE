@@ -13,7 +13,7 @@ const SEXOS = ["niño", "niña"];
 const PERIODOS = ["2026-1", "2026-2", "2027-1"];
 
 //Revisa que el valor sea una de las opciones
-const elegir =(valor, opciones, campo) => {
+const elegir = (valor, opciones, campo) => {
   if (!opciones.includes(valor)) {
     throw new ErrorValidacion(`${campo} debe ser uno de: ${opciones.join(", ")}`);
   }
@@ -21,7 +21,7 @@ const elegir =(valor, opciones, campo) => {
 };
 
 //Revisa que sea un número mayor a 0
-const numeroPositivo =(valor, campo) => {
+const numeroPositivo = (valor, campo) => {
   const n = Number(valor);
   if (typeof valor === "boolean" || valor === "" || valor === null || !Number.isFinite(n) || n <= 0) {
     throw new ErrorValidacion(`${campo} debe ser un número mayor a 0`);
@@ -30,7 +30,7 @@ const numeroPositivo =(valor, campo) => {
 };
 
 //Revisa que el número esté entre el mínimo y el máximo
-const enRango =(valor, min, max, campo) => {
+const enRango = (valor, min, max, campo) => {
   if (valor < min || valor > max) {
     throw new ErrorValidacion(`${campo} fuera de rango (${min} a ${max})`);
   }
@@ -38,7 +38,7 @@ const enRango =(valor, min, max, campo) => {
 };
 
 //Revisa que el texto no venga vacío ni muy largo
-const texto =(valor, campo, max = 100) => {
+const texto = (valor, campo, max = 100) => {
   if (typeof valor !== "string" || valor.trim() === "" || valor.length > max) {
     throw new ErrorValidacion(`${campo} es obligatorio (máximo ${max} caracteres)`);
   }
@@ -46,7 +46,7 @@ const texto =(valor, campo, max = 100) => {
 };
 
 //Revisa que la fecha sea válida y no sea del futuro
-const fechaPasada =(valor, campo) => {
+const fechaPasada = (valor, campo) => {
   if (typeof valor !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
     throw new ErrorValidacion(`${campo} debe tener formato AAAA-MM-DD`);
   }
@@ -65,7 +65,7 @@ const aCm = (valor, unidad) =>
   ({ mm: valor / 10, cm: valor, m: valor * 100, in: valor * 2.54 })[unidad];
 
 //Calcula la edad en meses
-const edadEnMeses =(fechaNacimiento) => {
+const edadEnMeses = (fechaNacimiento) => {
   const nacimiento = new Date(`${fechaNacimiento}T00:00:00`);
   const hoy = new Date();
   let meses =

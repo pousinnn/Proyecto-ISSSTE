@@ -3,12 +3,12 @@ import { PersonAdd } from "@mui/icons-material";
 import { useCreatePath, usePermissions, useTranslate } from "react-admin";
 import { useNavigate } from "react-router-dom";
 
-// Botón de la barra superior: lleva al formulario de alta de usuario.
-// Solo se muestra a administradores (el servidor también debe validarlo).
+//Boton para crear un usuario nuevo, solo lo ve el admin
 export const BotonNuevoUsuario = () => {
   const navigate = useNavigate();
   const createPath = useCreatePath();
   const translate = useTranslate();
+  //Revisa el rol del usuario
   const { permissions } = usePermissions();
 
   if (permissions !== "admin") return null;

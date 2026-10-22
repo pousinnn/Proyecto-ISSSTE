@@ -47,6 +47,7 @@ const MenuHistorial = () => {
   const location = useLocation();
   const translate = useTranslate();
 
+  //Botones del menu con su ruta, icono y color
   const secciones = [
     {
       nombre: translate("custom.resources.resultados"),
@@ -89,6 +90,7 @@ const MenuHistorial = () => {
   return (
     <Stack className="historial-menu" spacing={1}>
       {secciones.map((seccion) => {
+        //Marca el boton de la pagina donde estas
         const activo = location.pathname === seccion.ruta;
 
         return (
@@ -128,6 +130,7 @@ const TipoField = () => {
 
   const tipo = String(record.tipo || "");
 
+  //Color y nombre de cada tipo de medicion
   const colores: Record<string, "primary" | "secondary" | "success" | "info"> = {
     pesoytalla: "success",
     tallablanca: "secondary",
@@ -158,6 +161,7 @@ const VerDetalles = () => {
 
   if (!record) return null;
 
+  //Datos que se muestran en la ventana
   const campos = [
     { label: "ID", value: record.id },
     { label: translate("custom.historial.name"), value: record.nombre },
@@ -171,6 +175,7 @@ const VerDetalles = () => {
 
   return (
     <>
+      {/* BOTON VER */}
       <Button
         size="small"
         variant="outlined"
@@ -180,6 +185,7 @@ const VerDetalles = () => {
         {translate("custom.historial.view")}
       </Button>
 
+      {/* VENTANA CON LOS DETALLES */}
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -242,6 +248,7 @@ const HistorialFilters = () => {
 // COMPONENTE PRINCIPAL
 export const Historial = () => {
   const translate = useTranslate();
+  //Revisa el rol para saber si puede borrar
   const { permissions } = usePermissions();
 
   return (
@@ -285,6 +292,7 @@ export const Historial = () => {
                 },
               }}
             >
+              {/* COLUMNAS DE LA TABLA */}
               <DataTable
                 bulkActionButtons={false}
                 sx={{
@@ -335,7 +343,7 @@ export const Historial = () => {
                   render={() => (
                     <Stack direction="row" spacing={1}>
                       <VerDetalles />
-                      {/* Solo admin puede borrar (el servidor también lo valida) */}
+                      {/* Solo el admin puede borrar */}
                       {permissions === "admin" && (
                         <DeleteButton
                           mutationMode="pessimistic"

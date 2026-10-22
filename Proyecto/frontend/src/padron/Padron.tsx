@@ -34,16 +34,19 @@ import {
 import { API_URL } from "../dataProvider";
 import { OPCIONES_REGION, REGIONES } from "../regiones";
 
-// Las fechas vienen a medianoche UTC; se muestran en UTC para que no se recorran un día
+//Formato de fecha para que no se recorra un dia
 const FECHA = { timeZone: "UTC" } as const;
+//Meses para la tabla de inscripciones
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
+//Junta los apellidos y el nombre del niño
 const NombreCompleto = () => {
     const r = useRecordContext();
     if (!r) return null;
     return <>{[r.paterno, r.materno, r.nombre].filter(Boolean).join(" ")}</>;
 };
 
+//Etiqueta que dice si el niño esta activo o dado de baja
 const Activo = () => {
     const r = useRecordContext();
     const translate = useTranslate();
@@ -60,7 +63,7 @@ const Activo = () => {
     );
 };
 
-// Cuadrícula año × mes con las inscripciones (1 = inscrito, 0 = no, vacío = sin dato)
+//Tabla por año y mes de cuando estuvo inscrito el niño
 const Inscripciones = () => {
     const r = useRecordContext();
     const translate = useTranslate();
@@ -70,6 +73,7 @@ const Inscripciones = () => {
     const anios = [...new Set(Object.keys(valores).map((k) => k.slice(0, 4)))].sort();
     const sinFecha = Object.entries(r.inscripcionesSinFecha ?? {});
 
+    //Lo que se pone en cada cuadro
     const celda = (v: number | null | undefined) =>
         v === 1 ? "✓" : v === 0 ? "–" : "";
 
@@ -104,6 +108,7 @@ const Inscripciones = () => {
                     ))}
                 </TableBody>
             </Table>
+            {/* EXPLICACION DE LOS SIMBOLOS */}
             <Typography variant="caption" color="text.secondary">
                 {translate("custom.padron.legend", { _: "✓ inscrito · – no inscrito · vacío sin dato" })}
             </Typography>
@@ -128,8 +133,10 @@ const RegionInfante = () => {
     const [guardando, setGuardando] = useState(false);
 
     if (!r) return null;
+    //Si no es admin solo ve la region
     if (permissions !== "admin") return <>{r.region || "—"}</>;
 
+    //Guarda la nueva region en el servidor
     const guardar = async () => {
         setGuardando(true);
         try {
@@ -150,6 +157,7 @@ const RegionInfante = () => {
 
     return (
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            {/* MENU DE REGIONES Y BOTON GUARDAR */}
             <MuiTextField
                 select
                 size="small"
@@ -177,10 +185,13 @@ const RegionInfante = () => {
     );
 };
 
+//Lista de todos los niños del padron
 export const PadronList = () => {
     const translate = useTranslate();
+    //Atajo para las traducciones del padron
     const t = (k: string, def: string) => translate(`custom.padron.${k}`, { _: def });
 
+    //Filtros de busqueda
     const filtros = [
         <SearchInput source="q" alwaysOn key="q" placeholder={t("search", "Nombre o CURP")} />,
         <SelectInput
@@ -202,6 +213,7 @@ export const PadronList = () => {
             perPage={25}
             exporter={false}
         >
+            {/* COLUMNAS DE LA TABLA */}
             <DataTable bulkActionButtons={false} rowClick="show">
                 <DataTable.Col source="id_infante" label="ID" />
                 <DataTable.Col source="paterno" label={t("name", "Nombre")}>
@@ -221,6 +233,7 @@ export const PadronList = () => {
     );
 };
 
+//Detalle de un niño del padron
 export const PadronShow = () => {
     const translate = useTranslate();
     const t = (k: string, def: string) => translate(`custom.padron.${k}`, { _: def });
@@ -239,7 +252,7 @@ export const PadronShow = () => {
                 <Labeled label={translate("custom.common.region", { _: "Región" })}>
                     <RegionInfante />
                 </Labeled>
-                {/* TextField y no NumberField: es un identificador, no una cantidad (sin comas) */}
+                {/* MATRICULA como texto para que no salga con comas */}
                 <TextField source="matricula" label={t("parentId", "Matrícula del derechohabiente")} />
                 <TextField source="estrato" label={t("stratum", "Estrato")} />
                 <DateField source="freg" label={t("registered", "Fecha de registro")} options={FECHA} />

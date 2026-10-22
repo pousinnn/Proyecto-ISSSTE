@@ -18,7 +18,7 @@ export function requiereLogin(req, res, next) {
 }
 
 //Revisa que el usuario tenga el rol que se necesita
-export const requiereRol =(...roles) => (req, res, next) => {
+export const requiereRol = (...roles) => (req, res, next) => {
   if (!roles.includes(req.usuario?.rol)) {
     return res.status(403).json({ error: "No tienes permiso para esta acción" });
   }

@@ -22,12 +22,11 @@ const FUENTES = {
   },
 };
 
+//Pone la fecha en formato de México
 const formatearFecha = (fecha) =>
   fecha.toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short", timeZone: "America/Mexico_City" });
 
-// Une las tres colecciones de mediciones en una sola lista, con el mismo control
-// de acceso, búsqueda, orden y paginación. `formato` decide cómo se ve cada renglón:
-// Resultados y Historial usan los mismos datos pero con columnas distintas.
+//Junta las tres mediciones en una sola lista
 function rutaListado(formato) {
   const router = Router();
 
@@ -35,11 +34,12 @@ function rutaListado(formato) {
     const { _start = "0", _end = "10", _sort = "fecha", _order = "DESC", q, region } = req.query;
 
     const filtro = {};
-    // Filtro por región (solo texto, para que no se pueda inyectar un objeto)
+    //Filtro por región, solo si es texto
     if (typeof region === "string" && region) filtro.region = region;
-    // El control de acceso va AL FINAL: un doctor no puede pedir otra región
+    //Al final se aplica el acceso, el doctor no puede pedir otra región
     Object.assign(filtro, filtroAcceso(req.usuario));
 
+    //Trae las mediciones de cada colección
     const grupos = await Promise.all(
       Object.entries(FUENTES).map(async ([coleccion, fuente]) => {
         const docs = await getDb().collection(coleccion).find(filtro).toArray();
@@ -64,6 +64,7 @@ function rutaListado(formato) {
 
     let filas = grupos.flat();
 
+    //Búsqueda por texto
     if (typeof q === "string" && q.trim()) {
       const re = new RegExp(escaparRegex(q.trim()), "i");
       filas = filas.filter((f) =>
@@ -71,10 +72,12 @@ function rutaListado(formato) {
       );
     }
 
+    //Ordena la lista
     const campo = ["nombre", "titulo", "tipo", "zona", "region", "periodo"].includes(_sort) ? _sort : "fechaOrden";
     const signo = _order === "ASC" ? 1 : -1;
     filas.sort((a, b) => (a[campo] > b[campo] ? signo : a[campo] < b[campo] ? -signo : 0));
 
+    //Regresa solo la página que se pidió
     const inicio = Math.max(0, Number.parseInt(_start, 10) || 0);
     const fin = Math.min(inicio + 100, Number.parseInt(_end, 10) || inicio + 10);
 
@@ -84,19 +87,17 @@ function rutaListado(formato) {
   return router;
 }
 
-// GET /api/resultados — fecha ya formateada como texto
+//Resultados con la fecha ya formateada
 export default rutaListado(({ fechaOrden, ...fila }) => ({ ...fila, fecha: formatearFecha(fechaOrden) }));
 
-// GET /api/historial — fecha en ISO (la pantalla la muestra con <DateField>)
-// y el resumen en `resultado`, que es como lo nombra Historial.tsx
+//Historial con la fecha sin formato y el resumen en resultado
 export const rutasHistorial = rutaListado(({ fechaOrden, contenido, ...fila }) => ({
   ...fila,
   fecha: fechaOrden,
   resultado: contenido,
 }));
 
-// DELETE /api/historial/<tipo>-<id> — botón "Eliminar" del Historial (solo admin).
-// El id combina la colección y el _id: "pesoytalla-6ad96914..."
+//Borra un registro del historial, solo admin
 rutasHistorial.delete("/:id", requiereRol("admin"), async (req, res) => {
   const [tipo, idTexto] = req.params.id.split("-");
   if (!(tipo in FUENTES) || !ObjectId.isValid(idTexto)) {

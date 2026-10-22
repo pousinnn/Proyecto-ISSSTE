@@ -1,7 +1,9 @@
 
+//Textos de la pagina en español
 import { TranslationMessages } from "ra-core";
 
 const spanishMessages: TranslationMessages = {
+    //Textos de react-admin
     ra: {
         action: {
             add_filter: "Agregar filtro",
@@ -284,6 +286,7 @@ const spanishMessages: TranslationMessages = {
         },
     },
 
+    //Nombres de las paginas del menu
     resources: {
         users: {
             name: "Usuario |||| Usuarios",
@@ -364,7 +367,9 @@ const spanishMessages: TranslationMessages = {
             name: "Padrón",
         },
     },
+    //Textos propios del proyecto
     custom: {
+        //INICIO
         dashboard: {
     welcome: "Bienvenido, %{name}",
         loading: "Cargando usuario...",
@@ -374,6 +379,7 @@ const spanishMessages: TranslationMessages = {
         userId: "ID: %{id}",
     },
 
+    //NOMBRES DE SECCIONES
     resources: {
       resultados: "Resultados",
       pesoytalla: "Peso y Talla",
@@ -381,6 +387,7 @@ const spanishMessages: TranslationMessages = {
       perimetrocefalico: "Perímetro Cefálico",
     },
 
+    //TEXTOS COMUNES
     common: {
       instructions: "Instrucciones",
       sex: "Sexo",
@@ -402,6 +409,7 @@ const spanishMessages: TranslationMessages = {
       search: "Buscar",
     },
 
+    //PESO Y TALLA
     pesoytalla: {
       title: "Calculadora Peso & Talla",
       birthdate: "Fecha de nacimiento",
@@ -413,6 +421,7 @@ const spanishMessages: TranslationMessages = {
         "Selecciona el sexo, la fecha de nacimiento y registra el peso y la altura.",
     },
 
+    //TALLA BLANCA
     tallablanca: {
       title: "Calculadora Talla Blanco",
       fatherHeight: "Altura padre",
@@ -422,6 +431,7 @@ const spanishMessages: TranslationMessages = {
         "Ingresa la altura del padre y de la madre.",
     },
 
+    //PERIMETRO CEFALICO
     perimetrocefalico: {
       title: "Calculadora Perímetro Cefálico",
       perimeter: "Perímetro",
@@ -430,6 +440,7 @@ const spanishMessages: TranslationMessages = {
         "Selecciona el sexo e ingresa el perímetro cefálico.",
     },
 
+    //RESULTADOS
     resultados: {
       title: "Resultados",
       history: "Historial",
@@ -440,6 +451,7 @@ const spanishMessages: TranslationMessages = {
       date: "Fecha",
     },
     
+    //HISTORIAL
     historial: {
         title: "Historial de registros",
         name: "Nombre",
@@ -450,6 +462,7 @@ const spanishMessages: TranslationMessages = {
         view: "Ver",
         details: "Detalles del registro",
     },
+    //USUARIOS
     users: {
         new: "Nuevo usuario",
         title: "Crear usuario",
@@ -473,6 +486,7 @@ const spanishMessages: TranslationMessages = {
         },
     },
 
+    //AVISOS
     notifications: {
       saved: "Registro guardado correctamente",
       error: "Error al guardar el registro",

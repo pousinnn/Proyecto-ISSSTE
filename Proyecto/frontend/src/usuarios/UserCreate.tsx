@@ -20,6 +20,7 @@ import { Box, Divider, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { OPCIONES_REGION } from "../regiones";
 
+//Datos que se mandan al crear un usuario
 type DatosUsuario = {
   usuario: string;
   password: string;
@@ -29,15 +30,13 @@ type DatosUsuario = {
   infante?: Record<string, unknown>;
 };
 
-// Crea cuentas en POST /api/users (solo admin).
-// Si el rol es "paciente", también se capturan sus datos del padrón y el
-// servidor crea el infante y la cuenta ligados (id_infante).
+//Formulario para crear usuarios, si es paciente tambien pide sus datos del padron
 export const UserCreate = () => {
   const translate = useTranslate();
   const notify = useNotify();
   const navigate = useNavigate();
 
-  // Misma convención que usas en el resto de la app
+  //Atajo para las traducciones
   const t = (key: string, def?: string) => translate(`custom.${key}`, def ? { _: def } : undefined);
 
   // Solo se manda lo que corresponde al rol elegido
@@ -49,8 +48,7 @@ export const UserCreate = () => {
         : { usuario, password, rol, nombre };
 
   const fila = { display: "flex", gap: 2, width: "100%", flexWrap: "wrap" } as const;
-  // Fecha LOCAL de hoy en AAAA-MM-DD (toISOString daría la fecha en UTC,
-  // que en México por la noche ya es "mañana")
+  //Fecha de hoy en Mexico
   const hoy = new Date().toLocaleDateString("en-CA");
 
   return (
@@ -58,6 +56,7 @@ export const UserCreate = () => {
       title={t("users.title")}
       redirect={false}
       transform={transformar}
+      //Mensajes cuando se guarda o hay error
       mutationOptions={{
         onSuccess: () => {
           notify(t("users.notifications.created"), { type: "success" });
@@ -73,6 +72,7 @@ export const UserCreate = () => {
       }}
     >
       <SimpleForm>
+        {/* ROL, USUARIO Y CONTRASEÑA */}
         <SelectInput
           source="rol"
           label={t("users.role")}
@@ -100,6 +100,7 @@ export const UserCreate = () => {
           fullWidth
         />
 
+        {/* CAMPOS SEGUN EL ROL ELEGIDO */}
         <FormDataConsumer>
           {({ formData }) =>
             formData.rol === "paciente" ? (
@@ -109,12 +110,14 @@ export const UserCreate = () => {
                   {t("users.patientData", "Datos del padrón")}
                 </Typography>
 
+                {/* NOMBRE Y APELLIDOS */}
                 <Box sx={fila}>
                   <TextInput source="infante.nombre" label={t("padron.firstName", "Nombre(s)")} validate={[required(), maxLength(50)]} />
                   <TextInput source="infante.paterno" label={t("padron.lastName1", "Apellido paterno")} validate={[required(), maxLength(50)]} />
                   <TextInput source="infante.materno" label={t("padron.lastName2", "Apellido materno")} validate={maxLength(50)} />
                 </Box>
 
+                {/* CURP, GENERO Y FECHA DE NACIMIENTO */}
                 <Box sx={fila}>
                   <TextInput
                     source="infante.curp"
@@ -142,6 +145,7 @@ export const UserCreate = () => {
                   />
                 </Box>
 
+                {/* REGION Y DATOS DE LA ESTANCIA */}
                 <Box sx={fila}>
                   <SelectInput
                     source="infante.region"
@@ -154,6 +158,7 @@ export const UserCreate = () => {
                   <TextInput source="infante.estrato" label={t("padron.stratum", "Estrato")} validate={maxLength(2)} />
                 </Box>
 
+                {/* MATRICULA Y REGISTRO */}
                 <Box sx={fila}>
                   <NumberInput source="infante.matricula" label={t("padron.parentId", "Matrícula del derechohabiente")} validate={minValue(0)} />
                   <NumberInput source="infante.id_benef_infante" label={t("padron.beneficiaryId", "ID de beneficiario")} validate={minValue(0)} />
@@ -165,6 +170,7 @@ export const UserCreate = () => {
                   />
                 </Box>
 
+                {/* DISCAPACIDAD */}
                 <BooleanInput source="infante.discapacidad" label={t("padron.disability", "Discapacidad")} />
                 {formData.infante?.discapacidad && (
                   <TextInput source="infante.grupoDisc" label={t("padron.disabilityType", "Tipo de discapacidad")} validate={maxLength(25)} />
@@ -180,6 +186,7 @@ export const UserCreate = () => {
               </Box>
             ) : (
               <>
+                {/* DATOS DE ADMIN O DOCTOR */}
                 <TextInput
                   source="nombre"
                   label={t("users.name")}

@@ -1,14 +1,6 @@
-// Cómo se convierte un renglón de la tabla MySQL `padron` en un documento
-// de la colección `infantes` de MongoDB.
-//
-// Regla general: cada columna se guarda con su MISMO nombre (para poder
-// compararla con el SQL original), convertida al tipo correcto.
-// Excepción: las columnas de inscripción mensual (una por mes en MySQL)
-// se agrupan en un solo objeto `inscripciones`: { "2021-01": 1, "2021-02": 0, ... }
+//Pasa los datos del padrón de MySQL a mongodb con los mismos nombres
 
-// Columna MySQL → mes (AAAA-MM). Ojo: los nombres en MySQL NO son
-// consistentes (inscripIni.., inscIni.., InscIni.. con mayúscula), por eso
-// la lista es explícita en vez de calcularse.
+//Columnas de cada mes y el mes al que son
 export const COLUMNAS_MES = {
   inscripIniEne21: "2021-01",
   inscripIniFeb21: "2021-02",
@@ -85,11 +77,10 @@ export const COLUMNAS_MES = {
   InscIniAgo2026: "2026-08",
 };
 
-// Columnas de inscripción a las que no se les sabe el año. Se guardan con su
-// nombre original en `inscripcionesSinFecha` hasta confirmar a qué mes son.
+//Columnas de inscripción que no tienen año
 export const COLUMNAS_SIN_FECHA = ["inscIniOct", "inscripIni10", "inscripIni11", "inscripIni12"];
 
-// Tipo de cada una de las demás columnas
+//Tipo de dato de las demás columnas
 const ENTEROS = [
   "id_infante", "id_benef_infante", "matricula", "ebdi", "estatus_servicio", "activo",
   "puede_editar", "idAnt", "idPos", "baja", "motivoBaja", "discapacidad",
@@ -108,28 +99,30 @@ const TEXTOS = [
 
 export const CAMPOS = { ENTEROS, FECHAS, FECHA_HORA, TEXTOS };
 
+//Convierte a número
 const aEntero = (v) => (v === null || v === undefined || v === "" ? null : Number(v));
 
-// MySQL usa "0000-00-00" como fecha vacía en columnas NOT NULL → aquí es null.
-// Las fechas se guardan a medianoche UTC para que no se recorran de día por zona horaria.
+//Convierte a fecha, la fecha vacía de MySQL queda en null
 const aFecha = (v) => {
   if (!v || String(v).startsWith("0000-00-00")) return null;
   const fecha = new Date(`${String(v).replace(" ", "T")}${String(v).length === 10 ? "T00:00:00" : ""}Z`);
   return Number.isNaN(fecha.getTime()) ? null : fecha;
 };
 
+//Convierte a texto
 const aTexto = (v) => (v === null || v === undefined ? "" : String(v));
 
-// fila: objeto { nombreColumna: valor } tal como viene de MySQL
+//Convierte un renglón de MySQL en un infante
 export function filaAInfante(fila) {
   const doc = {};
   for (const c of ENTEROS) if (c in fila) doc[c] = aEntero(fila[c]);
   for (const c of [...FECHAS, ...FECHA_HORA]) if (c in fila) doc[c] = aFecha(fila[c]);
   for (const c of TEXTOS) if (c in fila) doc[c] = aTexto(fila[c]);
 
-  // El CURP siempre en mayúsculas y sin espacios
+  //El CURP en mayúsculas y sin espacios
   if (doc.curp) doc.curp = doc.curp.trim().toUpperCase();
 
+  //Junta las inscripciones de cada mes
   doc.inscripciones = {};
   for (const [columna, mes] of Object.entries(COLUMNAS_MES)) {
     if (columna in fila) doc.inscripciones[mes] = aEntero(fila[columna]);
@@ -143,7 +136,7 @@ export function filaAInfante(fila) {
   return doc;
 }
 
-// Columnas que el importador sabe manejar (para avisar si el .sql trae otras)
+//Columnas que conoce el importador
 export const COLUMNAS_CONOCIDAS = new Set([
   ...ENTEROS, ...FECHAS, ...FECHA_HORA, ...TEXTOS,
   ...Object.keys(COLUMNAS_MES), ...COLUMNAS_SIN_FECHA,

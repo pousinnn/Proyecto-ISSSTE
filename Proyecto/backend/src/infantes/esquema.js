@@ -1,18 +1,13 @@
-// Estructura y validación de la colección `infantes` (el padrón).
-//
-// MongoDB no obliga a tener columnas fijas como MySQL, pero sí permite
-// definir un "validador" ($jsonSchema): la propia base de datos rechaza
-// cualquier documento que no cumpla estas reglas, venga de donde venga
-// (el API, el importador, Compass o mongosh).
+//Reglas que mongodb revisa antes de guardar un infante
 import { CAMPOS, COLUMNAS_SIN_FECHA } from "./mapeo.js";
 import { REGIONES } from "../regiones.js";
 
 const tipo = (bsonType) => ({ bsonType });
 const MES = "^\\d{4}-(0[1-9]|1[0-2])$";
-// CURP: 4 letras, 6 dígitos (fecha), sexo (H/M/X), 5 letras, 1 alfanumérico, 1 dígito
-// También se permite vacío porque en MySQL el valor por defecto es ''.
+//Formato del CURP, también puede ir vacío
 const CURP = "^$|^[A-Z]{4}\\d{6}[HMX][A-Z]{5}[A-Z0-9]\\d$";
 
+//Tipo de dato de cada campo
 const propiedades = {
   ...Object.fromEntries(CAMPOS.ENTEROS.map((c) => [c, tipo(["int", "long", "null"])])),
   ...Object.fromEntries(CAMPOS.FECHAS.map((c) => [c, tipo(["date", "null"])])),
@@ -20,6 +15,7 @@ const propiedades = {
   ...Object.fromEntries(CAMPOS.TEXTOS.map((c) => [c, tipo("string")])),
 };
 
+//Validador de la colección infantes
 export const VALIDADOR = {
   $jsonSchema: {
     bsonType: "object",
@@ -32,11 +28,11 @@ export const VALIDADOR = {
       paterno: { bsonType: "string", maxLength: 50 },
       materno: { bsonType: "string", maxLength: 50 },
       comentario: { bsonType: "string", maxLength: 500 },
-      // No viene de MySQL: la asigna un admin desde la app. Opcional.
+      //La región la pone el admin desde la app
       region: { enum: REGIONES },
       inscripciones: {
         bsonType: "object",
-        // Solo se aceptan claves "AAAA-MM" con valor numérico o vacío
+        //Solo meses tipo AAAA-MM con número o vacío
         patternProperties: { [MES]: tipo(["int", "long", "null"]) },
         additionalProperties: false,
       },
@@ -49,24 +45,25 @@ export const VALIDADOR = {
   },
 };
 
+//Crea la colección infantes con sus reglas e índices
 export async function prepararInfantes(db) {
   const existe = await db.listCollections({ name: "infantes" }).hasNext();
   if (existe) {
-    // Si ya existe, actualiza las reglas por si cambiaron
+    //Si ya existe, actualiza las reglas
     await db.command({ collMod: "infantes", validator: VALIDADOR, validationLevel: "strict" });
   } else {
     await db.createCollection("infantes", { validator: VALIDADOR, validationLevel: "strict" });
   }
 
   const infantes = db.collection("infantes");
-  // id_infante es la llave primaria de MySQL → único aquí también
+  //El id_infante no se puede repetir
   await infantes.createIndex({ id_infante: 1 }, { unique: true });
-  // Un CURP no se puede repetir (pero varios pueden estar vacíos)
+  //El CURP no se puede repetir, pero puede ir vacío
   await infantes.createIndex(
     { curp: 1 },
     { unique: true, partialFilterExpression: { curp: { $type: "string", $gt: "" } } },
   );
-  // Para buscar rápido por estancia y por nombre
+  //Para buscar más rápido por estancia y nombre
   await infantes.createIndex({ ebdi: 1 });
   await infantes.createIndex({ paterno: 1, materno: 1, nombre: 1 });
 }

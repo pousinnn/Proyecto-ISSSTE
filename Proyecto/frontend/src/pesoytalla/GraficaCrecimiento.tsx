@@ -14,7 +14,7 @@ type Props = {
 };
 
 //Redondea el paso de los números de los ejes (1, 2, 5 o 10)
-const pasoBonito =(bruto: number) => {
+const pasoBonito = (bruto: number) => {
   const p = 10 ** Math.floor(Math.log10(bruto));
   const f = bruto / p;
   const m = f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10;
@@ -22,7 +22,7 @@ const pasoBonito =(bruto: number) => {
 };
 
 //Saca los números que se ven en los ejes
-const marcas =(min: number, max: number, n = 6) => {
+const marcas = (min: number, max: number, n = 6) => {
   if (!(max > min)) return [min];
   const paso = pasoBonito((max - min) / n);
   const res: number[] = [];
@@ -72,7 +72,7 @@ export const GraficaCrecimiento = ({
     H - m.b - ((y - ymin) / (ymax - ymin)) * (H - m.t - m.b);
 
   //Colores de la gráfica
-  const colorTexto =theme.palette.text.secondary;
+  const colorTexto = theme.palette.text.secondary;
   const colorGrid = theme.palette.divider;
   const colorCurva = theme.palette.primary.main;
 

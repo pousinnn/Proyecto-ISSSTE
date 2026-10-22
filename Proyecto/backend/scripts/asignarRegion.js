@@ -1,16 +1,10 @@
-// Asigna (o cambia) la región de un doctor.
-//
-// Uso:
-//   npm run asignar-region -- <usuario> <region>
-//   npm run asignar-region -- dr.luis "Centro Norte"
-//
-// El doctor debe volver a iniciar sesión para que el cambio aplique
-// (la región viaja dentro de su token).
+//Cambia la región de un doctor npm run asignar-region -- USUARIO "REGION"
 import { conectar, desconectar } from "../src/db.js";
 import { REGIONES } from "../src/regiones.js";
 
 const [usuario, region] = process.argv.slice(2);
 
+//Revisa que venga el usuario y una región válida
 if (!usuario || !region) {
   console.error('Uso: npm run asignar-region -- <usuario> "<región>"');
   process.exit(1);
@@ -20,6 +14,7 @@ if (!REGIONES.includes(region)) {
   process.exit(1);
 }
 
+//Busca al doctor y le guarda la región
 const db = await conectar();
 const cuenta = await db.collection("usuarios").findOne({ usuario });
 

@@ -40,6 +40,7 @@ const MenuResultados = () => {
   const location = useLocation();
   const translate = useTranslate();
 
+  //Botones del menu con su ruta, icono y color
   const secciones = [
     {
       nombre: translate("custom.resources.resultados"),
@@ -82,6 +83,7 @@ const MenuResultados = () => {
   return (
     <Stack className="resultados-menu" spacing={1}>
       {secciones.map((seccion) => {
+        //Marca el boton de la pagina donde estas
         const activo =
           location.pathname.startsWith(seccion.ruta);
 
@@ -228,6 +230,7 @@ export const Resultados = () => {
                 },
               }}
             >
+              {/* COLUMNAS DE LA TABLA */}
               <DataTable
                 bulkActionButtons={false}
                 sx={{

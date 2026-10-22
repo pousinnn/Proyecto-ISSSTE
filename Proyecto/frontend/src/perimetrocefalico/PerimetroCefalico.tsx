@@ -37,6 +37,7 @@ import { SelectorRegion } from "../SelectorRegion";
 
 type Sexo = "niño" | "niña";
 
+//Pantalla de perímetro cefálico (la medida alrededor de la cabeza)
 export const PerimetroCefalico = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -45,6 +46,7 @@ export const PerimetroCefalico = () => {
   const translate = useTranslate();
   const t = (key: string) => translate(`custom.${key}`);
 
+  //Para mostrar avisos y guardar en la base de datos
   const notify = useNotify();
   const [create, { isPending }] = useCreate();
 
@@ -123,6 +125,7 @@ export const PerimetroCefalico = () => {
 
     if (medidaCm === null) return;
 
+    //Datos que se mandan a la base de datos
     const registro = {
       region,
       paciente,
@@ -159,6 +162,7 @@ export const PerimetroCefalico = () => {
   // Colores dinámicos según el tema
   const labelColor = isDark ? "#e9ff75" : "#748c1f";
 
+  //Estilo de los campos de texto
   const inputStyle = {
     "& .MuiInputBase-root": {
       bgcolor: "action.hover",
@@ -226,6 +230,7 @@ export const PerimetroCefalico = () => {
             {/* COLUMNA IZQUIERDA */}
 
             <Grid size={{ xs: 12, md: 7 }}>
+              {/* INSTRUCCIONES */}
               <Typography
                 className="perimetro-section"
                 sx={{

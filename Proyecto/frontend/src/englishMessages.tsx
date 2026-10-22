@@ -1,6 +1,8 @@
+//Textos de la pagina en ingles
 import { TranslationMessages } from "ra-core";
 
 const englishMessages: TranslationMessages = {
+    //Textos de react-admin
     ra: {
         action: {
             add_filter: "Add filter",
@@ -303,6 +305,7 @@ const englishMessages: TranslationMessages = {
         },
     },
 
+    //Nombres de las paginas del menu
     resources: {
         users: {
             name: "User |||| Users",
@@ -391,7 +394,9 @@ const englishMessages: TranslationMessages = {
             name: "Registry",
         },
     },
+    //Textos propios del proyecto
     custom: {
+    //INICIO
     dashboard: {
         welcome: "Welcome, %{name}",
         loading: "Loading user...",
@@ -400,6 +405,7 @@ const englishMessages: TranslationMessages = {
         adminDescription: "Administration dashboard",
         userId: "ID: %{id}",
     },
+    //NOMBRES DE SECCIONES
     resources: {
       resultados: "Results",
       pesoytalla: "Weight and Height",
@@ -407,6 +413,7 @@ const englishMessages: TranslationMessages = {
       perimetrocefalico: "Head Circumference",
     },
     
+    //TEXTOS COMUNES
     common: {
       instructions: "Instructions",
       sex: "Sex",
@@ -428,6 +435,7 @@ const englishMessages: TranslationMessages = {
       search: "Search",
     },
 
+    //PESO Y TALLA
     pesoytalla: {
       title: "Weight & Height Calculator",
       birthdate: "Date of Birth",
@@ -439,6 +447,7 @@ const englishMessages: TranslationMessages = {
         "Select the sex and date of birth, then enter the weight and height.",
     },
 
+    //TALLA BLANCA
     tallablanca: {
       title: "Target Height Calculator",
       fatherHeight: "Father's Height",
@@ -448,6 +457,7 @@ const englishMessages: TranslationMessages = {
         "Enter the father's and mother's heights.",
     },
 
+    //PERIMETRO CEFALICO
     perimetrocefalico: {
       title: "Head Circumference Calculator",
       perimeter: "Circumference",
@@ -456,6 +466,7 @@ const englishMessages: TranslationMessages = {
         "Select the sex and enter the head circumference.",
     },
 
+    //RESULTADOS
     resultados: {
       title: "Results",
       history: "History",
@@ -466,6 +477,7 @@ const englishMessages: TranslationMessages = {
       date: "Date",
     },
     
+    //HISTORIAL
     historial: {
         title: "Record History",
         name: "Name",
@@ -476,6 +488,7 @@ const englishMessages: TranslationMessages = {
         view: "View",
         details: "Record Details",
     },
+    //USUARIOS
     users: {
         new: "New user",
         title: "Create user",
@@ -499,6 +512,7 @@ const englishMessages: TranslationMessages = {
         },
     },
     
+    //AVISOS
     notifications: {
       saved: "Record saved successfully",
       error: "Error saving the record",

@@ -1,11 +1,4 @@
-// POST /api/users — crear cuentas (solo admin; se aplica en server.js).
-//
-// Body: { usuario, password, rol: "admin", nombre }
-//       { usuario, password, rol: "doctor", nombre, region }   (solo verá su región)
-//       { usuario, password, rol: "paciente", infante: {...datos del padrón} }
-//
-// Si es paciente, en la misma operación se da de alta su registro en el
-// padrón (`infantes`) y la cuenta queda ligada con `id_infante`.
+//Crea cuentas nuevas, solo el admin; si es paciente también lo agrega al padrón
 import { Router } from "express";
 import { getDb } from "../db.js";
 import { hashPassword } from "../passwords.js";
@@ -16,9 +9,11 @@ import { REGIONES } from "../regiones.js";
 const router = Router();
 const ROLES = ["admin", "doctor", "paciente"];
 
+//Crear usuario
 router.post("/", async (req, res) => {
   const { usuario, password, rol, nombre, infante, region } = req.body ?? {};
 
+  //Revisa usuario, contraseña y rol
   if (typeof usuario !== "string" || !/^[A-Za-z0-9._-]{3,50}$/.test(usuario)) {
     throw new ErrorValidacion("Usuario: de 3 a 50 caracteres; solo letras, números, punto, guion y guion bajo");
   }
@@ -29,6 +24,7 @@ router.post("/", async (req, res) => {
     throw new ErrorValidacion(`Rol debe ser uno de: ${ROLES.join(", ")}`);
   }
 
+  //Revisa que el usuario no exista
   const db = getDb();
   const usuarios = db.collection("usuarios");
   if (await usuarios.findOne({ usuario })) {
@@ -38,8 +34,9 @@ router.post("/", async (req, res) => {
   let cuenta;
   let infanteCreado = null;
 
+  //Si es paciente se crea su infante en el padrón
   if (rol === "paciente") {
-    // El siguiente id_infante libre dentro del rango de la app
+    //Busca el siguiente id_infante libre
     const ultimo = await db
       .collection("infantes")
       .find({ id_infante: { $gte: ID_APP_MIN, $lte: ID_APP_MAX } })
@@ -62,6 +59,7 @@ router.post("/", async (req, res) => {
       id_infante: doc.id_infante,
     };
   } else {
+    //Admin o doctor, el doctor necesita región
     if (typeof nombre !== "string" || !nombre.trim() || nombre.length > 100) {
       throw new ErrorValidacion("Nombre es obligatorio (máximo 100 caracteres)");
     }
@@ -74,6 +72,7 @@ router.post("/", async (req, res) => {
     }
   }
 
+  //Guarda la cuenta con la contraseña en hash
   try {
     await usuarios.insertOne({
       ...cuenta,
@@ -82,13 +81,13 @@ router.post("/", async (req, res) => {
       fechaCreacion: new Date(),
     });
   } catch (e) {
-    // Si la cuenta no se pudo guardar, no dejamos un infante huérfano en el padrón
+    //Si falla, borra el infante que se acababa de crear
     if (infanteCreado) await db.collection("infantes").deleteOne({ id_infante: infanteCreado.id_infante });
     if (e.code === 11000) return res.status(409).json({ error: "Ese usuario ya existe" });
     throw e;
   }
 
-  // Nunca se regresa el hash de la contraseña
+  //No se regresa el hash de la contraseña
   res.status(201).json({ id: cuenta.usuario, ...cuenta });
 });
 
