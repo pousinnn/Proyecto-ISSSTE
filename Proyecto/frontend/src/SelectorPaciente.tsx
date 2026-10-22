@@ -1,7 +1,7 @@
 import { MenuItem, TextField, Typography, SxProps, Theme } from "@mui/material";
 import { useGetList, usePermissions, useTranslate } from "react-admin";
 
-//Lista para elegir el paciente, solo la ven admin y doctor
+//Lista para elegir al niño, solo la ven admin y estancia (la familia captura para el suyo)
 type Props = {
     value: string;
     onChange: (value: string) => void;
@@ -13,7 +13,7 @@ export const SelectorPaciente = ({ value, onChange, className, inputSx }: Props)
     const translate = useTranslate();
     //Revisa si el usuario puede elegir paciente
     const { permissions } = usePermissions();
-    const puedeElegir = permissions === "admin" || permissions === "doctor";
+    const puedeElegir = permissions === "admin" || permissions === "estancia";
 
     //Trae la lista de pacientes
     const { data: pacientes = [] } = useGetList(

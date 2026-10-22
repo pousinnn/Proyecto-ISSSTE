@@ -68,8 +68,9 @@ Comandos útiles (desde `Proyecto/backend`):
 
 | Comando | Para qué |
 |---|---|
-| `npm run crear-usuario -- <usuario> "<Nombre>" <contraseña> <rol> ["<región>"]` | Crear una cuenta (la región solo para doctor) |
-| `npm run asignar-region -- <usuario> "<región>"` | Cambiar la región de un doctor |
+| `npm run crear-usuario -- <usuario> "<Nombre>" <contraseña> <rol> ["<región>" o <EBDI>]` | Crear una cuenta (región para coordinador, EBDI para estancia) |
+| `npm run asignar-region -- <usuario> "<región>"` | Cambiar la región de un coordinador |
+| `npm run migrar-roles` | Pasar cuentas viejas: doctor → coordinador, paciente → familia |
 | `npm run importar-padron -- <archivo.sql> [--aplicar]` | Importar el padrón de MySQL (sin `--aplicar` solo revisa) |
 | `npm run datos-demo` / `-- --borrar` | Crear o borrar datos falsos para probar |
 
@@ -77,18 +78,19 @@ Comandos útiles (desde `Proyecto/backend`):
 
 | Rol | Qué puede hacer |
 |---|---|
-| **Admin** | Todo: ve todas las regiones, crea usuarios y borra registros |
-| **Doctor** | Solo ve y captura a los pacientes de **su región** |
-| **Paciente** | Solo ve y captura **sus propias** mediciones |
+| **Administrador** (`admin`) | Todo: ve todas las regiones y EBDI, crea usuarios y borra registros |
+| **Coordinador regional** (`coordinador`) | Solo **consulta** la información de **su región**; no captura |
+| **Usuario de estancia** (`estancia`) | Captura y consulta a los niños de **su EBDI**; no usa las calculadoras |
+| **Padre, madre o tutor** (`familia`) | Captura los datos de **su niño** en las calculadoras y ve sus resultados |
 
-Regiones: Norte, Centro Norte, Centro y Sur.
+Regiones: Norte, Centro Norte, Centro y Sur. La región de cada medición se toma del padrón del niño.
 
 ## Seguridad
 
 - Contraseñas guardadas con **Argon2id** (nunca en texto plano).
 - Sesión con **token JWT** firmado que expira en 1 hora.
 - Límite de **10 intentos de login** cada 15 minutos.
-- El servidor revisa **rol y región** en cada petición: nadie puede ver datos ajenos cambiando la URL.
+- El servidor revisa **rol, región y EBDI** en cada petición: nadie puede ver datos ajenos cambiando la URL.
 - Todos los datos se **validan en el servidor** (tipos, rangos, CURP) y los cálculos (IMC, talla blanco) se hacen ahí.
 - Protección contra **inyección NoSQL**, encabezados seguros (**Helmet**) y **CORS** limitado a la página.
 - `.env`, respaldos y contraseñas **no se suben** a GitHub.

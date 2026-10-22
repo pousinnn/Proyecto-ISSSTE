@@ -29,6 +29,7 @@ import {
   useNotify,
   useCreate,
   useTranslate,
+  usePermissions,
 } from "react-admin";
 
 import "./PerimetroCefalico.css";
@@ -44,6 +45,9 @@ export const PerimetroCefalico = () => {
 
   // Traducciones
   const translate = useTranslate();
+  //La estancia solo captura los datos, no usa las calculadoras
+  const { permissions } = usePermissions();
+  const soloCaptura = permissions === "estancia";
   const t = (key: string) => translate(`custom.${key}`);
 
   //Para mostrar avisos y guardar en la base de datos
@@ -425,7 +429,7 @@ export const PerimetroCefalico = () => {
 
           {/* RESULTADO */}
 
-          {resultado !== null && (
+          {!soloCaptura && resultado !== null && (
             <Alert
               severity="success"
               sx={{ mt: 3 }}
@@ -440,12 +444,14 @@ export const PerimetroCefalico = () => {
           {/* BOTONES */}
 
           <Box className="perimetro-actions">
-            <Button
-              variant="outlined"
-              onClick={calcular}
-            >
-              {t("common.convert")}
-            </Button>
+            {!soloCaptura && (
+              <Button
+                variant="outlined"
+                onClick={calcular}
+              >
+                {t("common.convert")}
+              </Button>
+            )}
 
             <Button
               variant="contained"

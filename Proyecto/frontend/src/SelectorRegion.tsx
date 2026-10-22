@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { MenuItem, TextField, Typography, SxProps, Theme } from "@mui/material";
-import { useGetIdentity, useTranslate } from "react-admin";
+import { usePermissions, useTranslate } from "react-admin";
 import { REGIONES } from "./regiones";
 
-//Selector de region, si es doctor se queda fija en su region
+//Selector de región: solo lo usa el admin; para los demás la región sale del padrón del niño
 type Props = {
     value: string;
     onChange: (value: string) => void;
@@ -11,16 +11,21 @@ type Props = {
     inputSx: SxProps<Theme>;
 };
 
+//Valor que se manda cuando la región la pone el servidor
+const DEL_PADRON = "del-padron";
+
 export const SelectorRegion = ({ value, onChange, className, inputSx }: Props) => {
     const translate = useTranslate();
-    //Saca la region del doctor que inicio sesion
-    const { data: identity } = useGetIdentity();
-    const regionFija = identity?.rol === "doctor" ? (identity.region as string | undefined) : undefined;
+    const { permissions } = usePermissions();
+    const esAdmin = permissions === "admin";
 
-    //Pone la region del doctor automaticamente
+    //Si no es admin, marca la región como "del padrón" para que el formulario deje guardar
     useEffect(() => {
-        if (regionFija && value !== regionFija) onChange(regionFija);
-    }, [regionFija, value, onChange]);
+        if (permissions && !esAdmin && value !== DEL_PADRON) onChange(DEL_PADRON);
+    }, [permissions, esAdmin, value, onChange]);
+
+    //Los que no son admin no escogen región
+    if (!esAdmin) return null;
 
     return (
         <>
@@ -36,10 +41,11 @@ export const SelectorRegion = ({ value, onChange, className, inputSx }: Props) =
                 select
                 fullWidth
                 size="small"
-                value={regionFija ?? value}
+                value={value === DEL_PADRON ? "" : value}
                 onChange={(e) => onChange(e.target.value)}
-                disabled={Boolean(regionFija)}
-                helperText={regionFija ? translate("custom.common.doctorRegion", { _: "Tu región asignada" }) : undefined}
+                helperText={translate("custom.common.regionFromRegistry", {
+                    _: "Si el niño está en el padrón, se usa su región",
+                })}
                 sx={inputSx}
                 slotProps={{ select: { displayEmpty: true } }}
             >

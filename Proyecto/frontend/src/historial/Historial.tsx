@@ -43,6 +43,9 @@ import "./Historial.css";
 
 // MENÚ LATERAL
 const MenuHistorial = () => {
+  //El coordinador regional no captura: se ocultan las calculadoras
+  const { permissions } = usePermissions();
+  const capturas = ["/pesoytalla", "/tallablanca", "/perimetrocefalico"];
   const navigate = useNavigate();
   const location = useLocation();
   const translate = useTranslate();
@@ -89,7 +92,9 @@ const MenuHistorial = () => {
 
   return (
     <Stack className="historial-menu" spacing={1}>
-      {secciones.map((seccion) => {
+      {secciones
+        .filter((s) => permissions !== "coordinador" || !capturas.includes(s.ruta))
+        .map((seccion) => {
         //Marca el boton de la pagina donde estas
         const activo = location.pathname === seccion.ruta;
 

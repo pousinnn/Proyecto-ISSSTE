@@ -150,24 +150,26 @@ const hash = await hashPassword(password);
 const usuarioDe = (x) =>
   `demo.${ascii(x.doc.nombre.split(" ")[0]).toLowerCase()}.${ascii(x.doc.paterno).toLowerCase()}`;
 
-//Un doctor por cada región
-const doctores = [
-  { usuario: "demo.dra.mendez", nombre: "Dra. Laura Méndez", rol: "doctor", region: "Norte" },
-  { usuario: "demo.dr.ortega", nombre: "Dr. Raúl Ortega", rol: "doctor", region: "Centro Norte" },
-  { usuario: "demo.dra.vega", nombre: "Dra. Patricia Vega", rol: "doctor", region: "Centro" },
-  { usuario: "demo.dr.salinas", nombre: "Dr. Jorge Salinas", rol: "doctor", region: "Sur" },
+//Un coordinador por cada región (solo consultan)
+const coordinadores = [
+  { usuario: "demo.coord.norte", nombre: "Laura Méndez (coord. Norte)", rol: "coordinador", region: "Norte" },
+  { usuario: "demo.coord.centronorte", nombre: "Raúl Ortega (coord. Centro Norte)", rol: "coordinador", region: "Centro Norte" },
+  { usuario: "demo.coord.centro", nombre: "Patricia Vega (coord. Centro)", rol: "coordinador", region: "Centro" },
+  { usuario: "demo.coord.sur", nombre: "Jorge Salinas (coord. Sur)", rol: "coordinador", region: "Sur" },
 ];
-//Una cuenta de paciente para los primeros infantes
-const pacientes = [];
-const usuariosUsados = new Set(doctores.map((d) => d.usuario));
+//Un usuario de estancia por cada EBDI (capturan a sus niños)
+const estancias = EBDIS.map((e) => ({ usuario: `demo.estancia.${e}`, nombre: `Estancia EBDI ${e}`, rol: "estancia", ebdi: e }));
+//Una cuenta de familia (papá, mamá o tutor) para los primeros infantes
+const familias = [];
+const usuariosUsados = new Set([...coordinadores, ...estancias].map((d) => d.usuario));
 for (const x of infantes.slice(0, CON_CUENTA)) {
   let u = usuarioDe(x);
   for (let k = 2; usuariosUsados.has(u); k++) u = `${usuarioDe(x)}${k}`;
   usuariosUsados.add(u);
-  pacientes.push({
+  familias.push({
     usuario: u,
     nombre: `${x.doc.nombre} ${x.doc.paterno} ${x.doc.materno}`,
-    rol: "paciente",
+    rol: "familia",
     id_infante: x.doc.id_infante,
     infante: x,
   });
@@ -184,9 +186,9 @@ if (existentes.length) {
 }
 
 await db.collection("usuarios").insertMany(
-  [...doctores, ...pacientes].map(({ infante, ...u }) => ({ ...u, passwordHash: hash, demo: true })),
+  [...coordinadores, ...estancias, ...familias].map(({ infante, ...u }) => ({ ...u, passwordHash: hash, demo: true })),
 );
-console.log(`Cuentas demo: ${doctores.length} doctores + ${pacientes.length} pacientes`);
+console.log(`Cuentas demo: ${coordinadores.length} coordinadores + ${estancias.length} estancias + ${familias.length} familias`);
 
 //Crea las mediciones con las mismas validaciones de la api
 const CAPTURAS = [
@@ -196,13 +198,14 @@ const CAPTURAS = [
 ];
 const mediciones = { pesoytalla: [], tallablanca: [], perimetrocefalico: [] };
 
-for (const p of pacientes) {
+for (const p of familias) {
   const { doc: inf, sexo, factor } = p.infante;
   const comunes = { sexo, region: inf.region, zona: `EBDI ${inf.ebdi}` };
-  const doctor = doctores.find((d) => d.region === inf.region);
+  //Las mediciones las captura la estancia del niño
+  const estancia = estancias.find((e) => e.ebdi === inf.ebdi);
   const meta = (fecha) => ({
     paciente: { usuario: p.usuario, nombre: p.nombre },
-    creadoPor: { usuario: doctor.usuario, nombre: doctor.nombre, rol: "doctor" },
+    creadoPor: { usuario: estancia.usuario, nombre: estancia.nombre, rol: "estancia" },
     fecha: new Date(fecha.getTime() + entero(9, 16) * 3600000),
     demo: true,
   });
@@ -266,11 +269,14 @@ const lineas = [
   "Cuentas DEMO (datos falsos). NO subir a GitHub.",
   `Contraseña de todas las cuentas demo: ${password}`,
   "",
-  "Doctores (cada uno ve solo su región):",
-  ...doctores.map((d) => `  ${d.usuario.padEnd(26)} ${d.nombre} · región ${d.region}`),
+  "Coordinadores regionales (solo consultan su región):",
+  ...coordinadores.map((d) => `  ${d.usuario.padEnd(26)} ${d.nombre}`),
   "",
-  "Pacientes (cada uno ve solo sus mediciones):",
-  ...pacientes.map((p) => `  ${p.usuario.padEnd(26)} ${p.nombre} · región ${p.infante.doc.region}`),
+  "Usuarios de estancia (capturan y consultan a los niños de su EBDI):",
+  ...estancias.map((e) => `  ${e.usuario.padEnd(26)} ${e.nombre}`),
+  "",
+  "Familias (cada una ve solo a su niño):",
+  ...familias.map((p) => `  ${p.usuario.padEnd(26)} ${p.nombre} · EBDI ${p.infante.doc.ebdi} · región ${p.infante.doc.region}`),
   "",
   "Para borrar todos los datos demo:  npm run datos-demo -- --borrar",
 ];

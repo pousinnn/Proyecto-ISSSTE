@@ -11,6 +11,7 @@ import rutasInfantes from "./routes/infantes.js";
 import rutasUsuarios from "./routes/usuarios.js";
 import { rutasMediciones } from "./routes/mediciones.js";
 import { ErrorValidacion } from "./validaciones.js";
+import { ROLES } from "./roles.js";
 
 //Api que conecta mongodb con la página de admin
 
@@ -48,9 +49,9 @@ app.use("/api", rutasAuth);
 app.use("/api", requiereLogin);
 app.use("/api/resultados", rutasResultados);
 app.use("/api/historial", rutasHistorial);
-app.use("/api/pacientes", requiereRol("admin", "doctor"), rutasPacientes);
-app.use("/api/infantes", requiereRol("admin", "doctor"), rutasInfantes);
-app.use("/api/users", requiereRol("admin"), rutasUsuarios);
+app.use("/api/pacientes", requiereRol(ROLES.ADMIN, ROLES.ESTANCIA), rutasPacientes);
+app.use("/api/infantes", requiereRol(ROLES.ADMIN, ROLES.COORDINADOR, ROLES.ESTANCIA), rutasInfantes);
+app.use("/api/users", requiereRol(ROLES.ADMIN), rutasUsuarios);
 for (const recurso of ["pesoytalla", "tallablanca", "perimetrocefalico"]) {
   app.use(`/api/${recurso}`, rutasMediciones(recurso));
 }

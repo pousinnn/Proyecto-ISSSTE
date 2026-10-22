@@ -29,6 +29,7 @@ import {
   useNotify,
   useCreate,
   useTranslate,
+  usePermissions,
 } from "react-admin";
 
 import "./pesoytalla.css";
@@ -60,6 +61,9 @@ export const PesoYTalla = () => {
 
   // Traducciones de React Admin
   const translate = useTranslate();
+  //La estancia solo captura los datos, no usa las calculadoras
+  const { permissions } = usePermissions();
+  const soloCaptura = permissions === "estancia";
 
   //Para mostrar avisos y guardar en la base de datos
   const notify = useNotify();
@@ -614,7 +618,7 @@ export const PesoYTalla = () => {
 
           {/* RESULTADOS */}
 
-          {resultado !== null && (
+          {!soloCaptura && resultado !== null && (
             <Alert
               severity={severidadGeneral(evaluacion)}
               sx={{ mt: 3 }}
@@ -662,7 +666,7 @@ export const PesoYTalla = () => {
 
           {/* GRÁFICAS */}
 
-          {evaluacion && (
+          {!soloCaptura && evaluacion && (
             <Grid container spacing={3} sx={{ mt: 1 }}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <GraficaCrecimiento
@@ -704,13 +708,15 @@ export const PesoYTalla = () => {
           {/* BOTONES */}
 
           <Box className="peso-actions">
-            <Button
-              variant="outlined"
-              startIcon={<Calculate />}
-              onClick={calcular}
-            >
-              {t("common.calculate")}
-            </Button>
+            {!soloCaptura && (
+              <Button
+                variant="outlined"
+                startIcon={<Calculate />}
+                onClick={calcular}
+              >
+                {t("common.calculate")}
+              </Button>
+            )}
 
             <Button
               variant="contained"

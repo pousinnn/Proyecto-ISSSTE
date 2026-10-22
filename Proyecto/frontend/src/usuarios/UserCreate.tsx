@@ -27,10 +27,11 @@ type DatosUsuario = {
   rol: string;
   nombre?: string;
   region?: string;
+  ebdi?: number;
   infante?: Record<string, unknown>;
 };
 
-//Formulario para crear usuarios, si es paciente tambien pide sus datos del padron
+//Formulario para crear usuarios, si es familia tambien pide los datos del niño en el padron
 export const UserCreate = () => {
   const translate = useTranslate();
   const notify = useNotify();
@@ -40,12 +41,14 @@ export const UserCreate = () => {
   const t = (key: string, def?: string) => translate(`custom.${key}`, def ? { _: def } : undefined);
 
   // Solo se manda lo que corresponde al rol elegido
-  const transformar = ({ usuario, password, rol, nombre, region, infante }: DatosUsuario) =>
-    rol === "paciente"
+  const transformar = ({ usuario, password, rol, nombre, region, ebdi, infante }: DatosUsuario) =>
+    rol === "familia"
       ? { usuario, password, rol, infante }
-      : rol === "doctor"
+      : rol === "coordinador"
         ? { usuario, password, rol, nombre, region }
-        : { usuario, password, rol, nombre };
+        : rol === "estancia"
+          ? { usuario, password, rol, nombre, ebdi }
+          : { usuario, password, rol, nombre };
 
   const fila = { display: "flex", gap: 2, width: "100%", flexWrap: "wrap" } as const;
   //Fecha de hoy en Mexico
@@ -79,8 +82,9 @@ export const UserCreate = () => {
           validate={required()}
           choices={[
             { id: "admin", name: "custom.users.roles.admin" },
-            { id: "doctor", name: "custom.users.roles.doctor" },
-            { id: "paciente", name: "custom.users.roles.patient" },
+            { id: "coordinador", name: "custom.users.roles.coordinator" },
+            { id: "estancia", name: "custom.users.roles.staff" },
+            { id: "familia", name: "custom.users.roles.family" },
           ]}
         />
         <TextInput
@@ -103,7 +107,7 @@ export const UserCreate = () => {
         {/* CAMPOS SEGUN EL ROL ELEGIDO */}
         <FormDataConsumer>
           {({ formData }) =>
-            formData.rol === "paciente" ? (
+            formData.rol === "familia" ? (
               <Box sx={{ width: "100%" }}>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="h6" gutterBottom>
@@ -186,20 +190,30 @@ export const UserCreate = () => {
               </Box>
             ) : (
               <>
-                {/* DATOS DE ADMIN O DOCTOR */}
+                {/* DATOS DE ADMIN, COORDINADOR O ESTANCIA */}
                 <TextInput
                   source="nombre"
                   label={t("users.name")}
                   validate={[required(), maxLength(100)]}
                   fullWidth
                 />
-                {formData.rol === "doctor" && (
+                {/* El coordinador solo consulta su región */}
+                {formData.rol === "coordinador" && (
                   <SelectInput
                     source="region"
                     label={t("common.region", "Región")}
-                    helperText={t("users.doctorRegionHelp", "El doctor solo verá a los pacientes de esta región")}
+                    helperText={t("users.coordinatorRegionHelp", "Solo verá la información de esta región")}
                     validate={required()}
                     choices={OPCIONES_REGION}
+                  />
+                )}
+                {/* La estancia captura a los niños de su EBDI */}
+                {formData.rol === "estancia" && (
+                  <NumberInput
+                    source="ebdi"
+                    label="EBDI"
+                    helperText={t("users.staffEbdiHelp", "Número de la estancia; solo capturará a los niños de esta EBDI")}
+                    validate={[required(), minValue(1)]}
                   />
                 )}
               </>

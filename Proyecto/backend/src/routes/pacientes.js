@@ -1,22 +1,12 @@
 
 import { Router } from "express";
-import { getDb } from "../db.js";
-import { pacientesDeRegion } from "./mediciones.js";
+import { familiasDe, filtroInfantes } from "./mediciones.js";
 
 const router = Router();
 
-//Lista de pacientes para el selector: el admin ve todos, el doctor solo los de su región
+//Lista de niños para el selector al capturar: el admin ve todos, la estancia solo los de su EBDI
 router.get("/", async (req, res) => {
-  let pacientes;
-  if (req.usuario.rol === "doctor") {
-    pacientes = req.usuario.region ? await pacientesDeRegion(req.usuario.region) : [];
-  } else {
-    pacientes = await getDb()
-      .collection("usuarios")
-      .find({ rol: "paciente" }, { projection: { _id: 0, usuario: 1, nombre: 1 } })
-      .sort({ nombre: 1 })
-      .toArray();
-  }
+  const pacientes = await familiasDe(filtroInfantes(req.usuario));
 
   res
     .set("X-Total-Count", String(pacientes.length))

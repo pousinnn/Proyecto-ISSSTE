@@ -7,11 +7,11 @@ import { construirInfante, ID_APP_MIN, ID_APP_MAX } from "../infantes/crear.js";
 import { REGIONES } from "../regiones.js";
 
 const router = Router();
-const ROLES = ["admin", "doctor", "paciente"];
+import { ROLES, LISTA_ROLES } from "../roles.js";
 
 //Crear usuario
 router.post("/", async (req, res) => {
-  const { usuario, password, rol, nombre, infante, region } = req.body ?? {};
+  const { usuario, password, rol, nombre, infante, region, ebdi } = req.body ?? {};
 
   //Revisa usuario, contraseña y rol
   if (typeof usuario !== "string" || !/^[A-Za-z0-9._-]{3,50}$/.test(usuario)) {
@@ -20,8 +20,8 @@ router.post("/", async (req, res) => {
   if (typeof password !== "string" || password.length < 8 || password.length > 128) {
     throw new ErrorValidacion("La contraseña debe tener entre 8 y 128 caracteres");
   }
-  if (!ROLES.includes(rol)) {
-    throw new ErrorValidacion(`Rol debe ser uno de: ${ROLES.join(", ")}`);
+  if (!LISTA_ROLES.includes(rol)) {
+    throw new ErrorValidacion(`Rol debe ser uno de: ${LISTA_ROLES.join(", ")}`);
   }
 
   //Revisa que el usuario no exista
@@ -34,8 +34,8 @@ router.post("/", async (req, res) => {
   let cuenta;
   let infanteCreado = null;
 
-  //Si es paciente se crea su infante en el padrón
-  if (rol === "paciente") {
+  //Si es familia se crea el niño en el padrón
+  if (rol === ROLES.FAMILIA) {
     //Busca el siguiente id_infante libre
     const ultimo = await db
       .collection("infantes")
@@ -59,16 +59,23 @@ router.post("/", async (req, res) => {
       id_infante: doc.id_infante,
     };
   } else {
-    //Admin o doctor, el doctor necesita región
+    //Admin, coordinador o estancia: el coordinador necesita región y la estancia su EBDI
     if (typeof nombre !== "string" || !nombre.trim() || nombre.length > 100) {
       throw new ErrorValidacion("Nombre es obligatorio (máximo 100 caracteres)");
     }
     cuenta = { usuario, nombre: nombre.trim(), rol };
-    if (rol === "doctor") {
+    if (rol === ROLES.COORDINADOR) {
       if (!REGIONES.includes(region)) {
-        throw new ErrorValidacion(`El doctor necesita una región: ${REGIONES.join(", ")}`);
+        throw new ErrorValidacion(`El coordinador necesita una región: ${REGIONES.join(", ")}`);
       }
       cuenta.region = region;
+    }
+    if (rol === ROLES.ESTANCIA) {
+      const numero = Number(ebdi);
+      if (typeof ebdi === "boolean" || !Number.isInteger(numero) || numero < 1 || numero > 999) {
+        throw new ErrorValidacion("La estancia necesita su número de EBDI (1 a 999)");
+      }
+      cuenta.ebdi = numero;
     }
   }
 

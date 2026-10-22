@@ -37,7 +37,7 @@ function rutaListado(formato) {
     //Filtro por región, solo si es texto
     if (typeof region === "string" && region) filtro.region = region;
     //Al final se aplica el acceso, el doctor no puede pedir otra región
-    Object.assign(filtro, filtroAcceso(req.usuario));
+    Object.assign(filtro, await filtroAcceso(req.usuario));
 
     //Trae las mediciones de cada colección
     const grupos = await Promise.all(

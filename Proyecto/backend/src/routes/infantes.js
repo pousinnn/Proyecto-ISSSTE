@@ -1,7 +1,7 @@
 //Rutas del padrón de infantes, solo para admin y doctor
 import { Router } from "express";
 import { getDb } from "../db.js";
-import { escaparRegex, filtroAcceso } from "./mediciones.js";
+import { escaparRegex, filtroInfantes } from "./mediciones.js";
 import { requiereRol } from "../middleware/auth.js";
 import { REGIONES } from "../regiones.js";
 import { ErrorValidacion } from "../validaciones.js";
@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
     filtro.$or = [{ nombre: re }, { paterno: re }, { materno: re }, { curp: re }];
   }
   //El doctor solo ve los infantes de su región
-  Object.assign(filtro, filtroAcceso(req.usuario));
+  Object.assign(filtro, filtroInfantes(req.usuario));
   //Orden y páginas
 
   const campo = CAMPOS_ORDENABLES.includes(_sort) ? (_sort === "id" ? "id_infante" : _sort) : "paterno";
@@ -59,7 +59,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
   //Si es de otra región dice que no existe
-  const doc = Number.isInteger(id) && (await coleccion().findOne({ id_infante: id, ...filtroAcceso(req.usuario) }));
+  const doc = Number.isInteger(id) && (await coleccion().findOne({ id_infante: id, ...filtroInfantes(req.usuario) }));
   if (!doc) return res.status(404).json({ error: "No encontrado" });
   res.json(aCliente(doc));
 });

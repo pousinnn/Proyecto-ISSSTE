@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { getDb } from "../db.js";
 import { hashPassword, verificarPassword } from "../passwords.js";
+import { ROLES } from "../roles.js";
 
 const router = Router();
 
@@ -40,17 +41,20 @@ router.post("/login", limiteLogin, async (req, res) => {
     await usuarios.updateOne({ _id: usuario._id }, { $set: { passwordHash: await hashPassword(password) } });
   }
 
-  //Crea el token con la región del doctor para que no la puedan cambiar
-  const region = usuario.rol === "doctor" ? usuario.region : undefined;
+  //Crea el token con la región del coordinador o la EBDI de la estancia para que no la puedan cambiar
+  const extra = {
+    ...(usuario.rol === ROLES.COORDINADOR && usuario.region && { region: usuario.region }),
+    ...(usuario.rol === ROLES.ESTANCIA && usuario.ebdi && { ebdi: usuario.ebdi }),
+  };
   const token = jwt.sign(
-    { sub: usuario.usuario, nombre: usuario.nombre, rol: usuario.rol, ...(region && { region }) },
+    { sub: usuario.usuario, nombre: usuario.nombre, rol: usuario.rol, ...extra },
     process.env.JWT_SECRET,
     { algorithm: "HS256", expiresIn: process.env.JWT_EXPIRES_IN ?? "1h" },
   );
 
   res.json({
     token,
-    usuario: { id: usuario.usuario, fullName: usuario.nombre, rol: usuario.rol, ...(region && { region }) },
+    usuario: { id: usuario.usuario, fullName: usuario.nombre, rol: usuario.rol, ...extra },
   });
 });
 

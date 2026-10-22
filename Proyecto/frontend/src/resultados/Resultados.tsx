@@ -4,6 +4,7 @@ import {
   DataTable,
   SearchInput,
   SelectInput,
+  usePermissions,
   useRecordContext,
   useTranslate,
 } from "react-admin";
@@ -36,6 +37,9 @@ import "./Resultados.css";
 
 // Menú lateral
 const MenuResultados = () => {
+  //El coordinador regional no captura: se ocultan las calculadoras
+  const { permissions } = usePermissions();
+  const capturas = ["/pesoytalla", "/tallablanca", "/perimetrocefalico"];
   const navigate = useNavigate();
   const location = useLocation();
   const translate = useTranslate();
@@ -82,7 +86,9 @@ const MenuResultados = () => {
 
   return (
     <Stack className="resultados-menu" spacing={1}>
-      {secciones.map((seccion) => {
+      {secciones
+        .filter((s) => permissions !== "coordinador" || !capturas.includes(s.ruta))
+        .map((seccion) => {
         //Marca el boton de la pagina donde estas
         const activo =
           location.pathname.startsWith(seccion.ruta);

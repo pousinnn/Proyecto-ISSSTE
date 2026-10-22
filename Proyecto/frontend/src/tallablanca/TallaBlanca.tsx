@@ -30,6 +30,7 @@ import {
   useNotify,
   useCreate,
   useTranslate,
+  usePermissions,
 } from "react-admin";
 
 import "./TallaBlanca.css";
@@ -46,6 +47,9 @@ export const TallaBlanca = () => {
 
   // Traducciones
   const translate = useTranslate();
+  //La estancia solo captura los datos, no usa las calculadoras
+  const { permissions } = usePermissions();
+  const soloCaptura = permissions === "estancia";
   const t = (key: string) => translate(`custom.${key}`);
 
   //Para mostrar avisos y guardar en la base de datos
@@ -491,7 +495,7 @@ export const TallaBlanca = () => {
 
           {/* RESULTADO */}
 
-          {resultado !== null && (
+          {!soloCaptura && resultado !== null && (
             <Alert severity="success" sx={{ mt: 3 }}>
               <Typography fontWeight="bold">
                 {t("tallablanca.result")}:{" "}
@@ -503,13 +507,15 @@ export const TallaBlanca = () => {
           {/* BOTONES */}
 
           <Box className="talla-actions">
-            <Button
-              variant="outlined"
-              startIcon={<Calculate />}
-              onClick={calcular}
-            >
-              {t("common.calculate")}
-            </Button>
+            {!soloCaptura && (
+              <Button
+                variant="outlined"
+                startIcon={<Calculate />}
+                onClick={calcular}
+              >
+                {t("common.calculate")}
+              </Button>
+            )}
 
             <Button
               variant="contained"

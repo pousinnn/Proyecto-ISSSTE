@@ -66,28 +66,32 @@ export const App = () =>(
     authProvider={authProvider}
     dashboard={Dashboard}
     i18nProvider={i18nProvider}>
-        {/* USUARIOS */}
-        <Resource name="users" create={UserCreate} />
-        {/* RESULTADOS */}
-        <Resource name="resultados" list={Resultados} icon={Assessment} />
+        {/* El menú cambia según el rol (el servidor también lo revisa) */}
+        {(permissions: string) => [
+            //USUARIOS
+            <Resource key="users" name="users" create={UserCreate} />,
+            //RESULTADOS
+            <Resource key="resultados" name="resultados" list={Resultados} icon={Assessment} />,
 
-        {/* PESO Y TALLA */}
-        <Resource name="pesoytalla" list={PesoYTalla} icon={MonitorWeight} />
-        
-        {/* TALLA BLANCA */}
-        <Resource name="tallablanca" list={TallaBlanca} icon={Height}/>
+            //CAPTURA: el coordinador regional solo consulta, no captura
+            ...(permissions !== "coordinador"
+                ? [
+                      //PESO Y TALLA
+                      <Resource key="pesoytalla" name="pesoytalla" list={PesoYTalla} icon={MonitorWeight} />,
+                      //TALLA BLANCA
+                      <Resource key="tallablanca" name="tallablanca" list={TallaBlanca} icon={Height} />,
+                      //PERIMETRO CEFALICO
+                      <Resource key="perimetrocefalico" name="perimetrocefalico" list={PerimetroCefalico} icon={Straighten} />,
+                  ]
+                : []),
 
-        {/* PERIMETRO CEFALICO */}
-        <Resource name="perimetrocefalico" list={PerimetroCefalico} icon={Straighten} />
+            //HISTORIAL
+            <Resource key="historial" name="historial" list={Historial} icon={History} />,
 
-        {/* HISTORIAL */}
-        <Resource name="historial" list={Historial} icon={History} />
-
-        {/* PADRON solo lo ven doctor y admin */}
-        {(permissions: string) =>
-            permissions === "admin" || permissions === "doctor"
-                ? <Resource name="infantes" list={PadronList} show={PadronShow} icon={ChildCare} />
-                : null
-        }
+            //PADRON: admin, coordinador (su región) y estancia (su EBDI)
+            ...(["admin", "coordinador", "estancia"].includes(permissions)
+                ? [<Resource key="infantes" name="infantes" list={PadronList} show={PadronShow} icon={ChildCare} />]
+                : []),
+        ]}
     </Admin>
 );
