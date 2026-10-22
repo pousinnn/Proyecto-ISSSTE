@@ -9,7 +9,8 @@
     "dev": "node --env-file=.env --watch src/server.js",
     "crear-usuario": "node --env-file=.env scripts/crearUsuario.js",
     "importar-padron": "node --env-file=.env scripts/importarPadron.js",
-    "datos-demo": "node --env-file=.env scripts/datosDemo.js"
+    "datos-demo": "node --env-file=.env scripts/datosDemo.js",
+    "asignar-region": "node --env-file=.env scripts/asignarRegion.js"
   },
   "dependencies": {
     "argon2": "^0.45.1",

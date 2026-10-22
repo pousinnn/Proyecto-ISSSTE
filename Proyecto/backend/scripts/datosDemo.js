@@ -157,9 +157,12 @@ const hash = await hashPassword(password);
 const usuarioDe = (x) =>
   `demo.${ascii(x.doc.nombre.split(" ")[0]).toLowerCase()}.${ascii(x.doc.paterno).toLowerCase()}`;
 
+// Un doctor por región: cada uno solo ve a los pacientes de la suya
 const doctores = [
-  { usuario: "demo.dra.mendez", nombre: "Dra. Laura Méndez", rol: "doctor" },
-  { usuario: "demo.dr.salinas", nombre: "Dr. Jorge Salinas", rol: "doctor" },
+  { usuario: "demo.dra.mendez", nombre: "Dra. Laura Méndez", rol: "doctor", region: "Norte" },
+  { usuario: "demo.dr.ortega", nombre: "Dr. Raúl Ortega", rol: "doctor", region: "Centro Norte" },
+  { usuario: "demo.dra.vega", nombre: "Dra. Patricia Vega", rol: "doctor", region: "Centro" },
+  { usuario: "demo.dr.salinas", nombre: "Dr. Jorge Salinas", rol: "doctor", region: "Sur" },
 ];
 const pacientes = [];
 const usuariosUsados = new Set(doctores.map((d) => d.usuario));
@@ -202,7 +205,7 @@ const mediciones = { pesoytalla: [], tallablanca: [], perimetrocefalico: [] };
 for (const p of pacientes) {
   const { doc: inf, sexo, factor } = p.infante;
   const comunes = { sexo, region: inf.region, zona: `EBDI ${inf.ebdi}` };
-  const doctor = uno(doctores);
+  const doctor = doctores.find((d) => d.region === inf.region);
   const meta = (fecha) => ({
     paciente: { usuario: p.usuario, nombre: p.nombre },
     creadoPor: { usuario: doctor.usuario, nombre: doctor.nombre, rol: "doctor" },
@@ -266,8 +269,8 @@ const lineas = [
   "Cuentas DEMO (datos falsos). NO subir a GitHub.",
   `Contraseña de todas las cuentas demo: ${password}`,
   "",
-  "Doctores:",
-  ...doctores.map((d) => `  ${d.usuario.padEnd(26)} ${d.nombre}`),
+  "Doctores (cada uno ve solo su región):",
+  ...doctores.map((d) => `  ${d.usuario.padEnd(26)} ${d.nombre} · región ${d.region}`),
   "",
   "Pacientes (cada uno ve solo sus mediciones):",
   ...pacientes.map((p) => `  ${p.usuario.padEnd(26)} ${p.nombre} · región ${p.infante.doc.region}`),

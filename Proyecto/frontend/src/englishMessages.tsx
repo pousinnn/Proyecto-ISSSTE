@@ -418,6 +418,7 @@ const englishMessages: TranslationMessages = {
       selectPatient: "Select a patient",
       region: "Region",
       selectRegion: "Select a region",
+      doctorRegion: "Your assigned region",
       allRegions: "All",
       unit: "Unit",
       quantity: "Quantity",
@@ -484,6 +485,7 @@ const englishMessages: TranslationMessages = {
         usernameHelp: "Used to sign in (e.g. dr.luis or an ID number)",
         usernameInvalid: "3 to 50 characters: letters, numbers, dot, dash or underscore",
         patientData: "Registry data",
+        doctorRegionHelp: "The doctor will only see patients from this region",
         password: "Password",
         role: "Role",
         roles: {

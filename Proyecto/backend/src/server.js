@@ -53,7 +53,8 @@ app.use((_req, res) => res.status(404).json({ error: "Ruta no encontrada" }));
 
 app.use((err, _req, res, _next) => {
   if (err instanceof ErrorValidacion) {
-    return res.status(400).json({ error: err.message });
+    // 400 por defecto; algunos errores traen su propio código (ej. 403)
+    return res.status(err.status ?? 400).json({ error: err.message });
   }
   if (err.type === "entity.parse.failed" || err.type === "entity.too.large") {
     return res.status(400).json({ error: "Cuerpo de la petición inválido" });

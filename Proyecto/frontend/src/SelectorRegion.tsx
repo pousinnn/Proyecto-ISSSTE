@@ -1,8 +1,11 @@
+import { useEffect } from "react";
 import { MenuItem, TextField, Typography, SxProps, Theme } from "@mui/material";
-import { useTranslate } from "react-admin";
+import { useGetIdentity, useTranslate } from "react-admin";
 import { REGIONES } from "./regiones";
 
-// Selector de región para los formularios de captura
+// Selector de región para los formularios de captura.
+// Si quien captura es un doctor, la región queda fija en la suya
+// (el servidor también la fuerza, esto solo evita confusiones en pantalla).
 type Props = {
     value: string;
     onChange: (value: string) => void;
@@ -12,6 +15,12 @@ type Props = {
 
 export const SelectorRegion = ({ value, onChange, className, inputSx }: Props) => {
     const translate = useTranslate();
+    const { data: identity } = useGetIdentity();
+    const regionFija = identity?.rol === "doctor" ? (identity.region as string | undefined) : undefined;
+
+    useEffect(() => {
+        if (regionFija && value !== regionFija) onChange(regionFija);
+    }, [regionFija, value, onChange]);
 
     return (
         <>
@@ -26,8 +35,10 @@ export const SelectorRegion = ({ value, onChange, className, inputSx }: Props) =
                 select
                 fullWidth
                 size="small"
-                value={value}
+                value={regionFija ?? value}
                 onChange={(e) => onChange(e.target.value)}
+                disabled={Boolean(regionFija)}
+                helperText={regionFija ? translate("custom.common.doctorRegion", { _: "Tu región asignada" }) : undefined}
                 sx={inputSx}
                 slotProps={{ select: { displayEmpty: true } }}
             >

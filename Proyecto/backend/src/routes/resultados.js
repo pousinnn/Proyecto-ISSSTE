@@ -27,9 +27,11 @@ const formatearFecha = (fecha) =>
 router.get("/", async (req, res) => {
   const { _start = "0", _end = "10", _sort = "fecha", _order = "DESC", q, region } = req.query;
 
-  const filtro = { ...filtroAcceso(req.usuario) };
+  const filtro = {};
   // Filtro por región (solo texto, para que no se pueda inyectar un objeto)
   if (typeof region === "string" && region) filtro.region = region;
+  // El control de acceso va AL FINAL: un doctor no puede pedir otra región
+  Object.assign(filtro, filtroAcceso(req.usuario));
 
   const grupos = await Promise.all(
     Object.entries(FUENTES).map(async ([coleccion, fuente]) => {

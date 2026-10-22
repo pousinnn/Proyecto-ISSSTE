@@ -392,6 +392,7 @@ const spanishMessages: TranslationMessages = {
       selectPatient: "Selecciona un paciente",
       region: "Región",
       selectRegion: "Selecciona una región",
+      doctorRegion: "Tu región asignada",
       allRegions: "Todas",
       unit: "Unidad",
       quantity: "Cantidad",
@@ -458,6 +459,7 @@ const spanishMessages: TranslationMessages = {
         usernameHelp: "Con este dato inicia sesión (ej. dr.luis o una matrícula)",
         usernameInvalid: "De 3 a 50 caracteres: letras, números, punto, guion o guion bajo",
         patientData: "Datos del padrón",
+        doctorRegionHelp: "El doctor solo verá a los pacientes de esta región",
         password: "Contraseña",
         role: "Rol",
         roles: {

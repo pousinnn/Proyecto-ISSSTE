@@ -1,6 +1,7 @@
 // POST /api/users — crear cuentas (solo admin; se aplica en server.js).
 //
-// Body: { usuario, password, rol, nombre }            para admin y doctor
+// Body: { usuario, password, rol: "admin", nombre }
+//       { usuario, password, rol: "doctor", nombre, region }   (solo verá su región)
 //       { usuario, password, rol: "paciente", infante: {...datos del padrón} }
 //
 // Si es paciente, en la misma operación se da de alta su registro en el
@@ -10,12 +11,13 @@ import { getDb } from "../db.js";
 import { hashPassword } from "../passwords.js";
 import { ErrorValidacion } from "../validaciones.js";
 import { construirInfante, ID_APP_MIN, ID_APP_MAX } from "../infantes/crear.js";
+import { REGIONES } from "../regiones.js";
 
 const router = Router();
 const ROLES = ["admin", "doctor", "paciente"];
 
 router.post("/", async (req, res) => {
-  const { usuario, password, rol, nombre, infante } = req.body ?? {};
+  const { usuario, password, rol, nombre, infante, region } = req.body ?? {};
 
   if (typeof usuario !== "string" || !/^[A-Za-z0-9._-]{3,50}$/.test(usuario)) {
     throw new ErrorValidacion("Usuario: de 3 a 50 caracteres; solo letras, números, punto, guion y guion bajo");
@@ -64,6 +66,12 @@ router.post("/", async (req, res) => {
       throw new ErrorValidacion("Nombre es obligatorio (máximo 100 caracteres)");
     }
     cuenta = { usuario, nombre: nombre.trim(), rol };
+    if (rol === "doctor") {
+      if (!REGIONES.includes(region)) {
+        throw new ErrorValidacion(`El doctor necesita una región: ${REGIONES.join(", ")}`);
+      }
+      cuenta.region = region;
+    }
   }
 
   try {

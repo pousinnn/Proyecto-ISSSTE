@@ -25,6 +25,7 @@ type DatosUsuario = {
   password: string;
   rol: string;
   nombre?: string;
+  region?: string;
   infante?: Record<string, unknown>;
 };
 
@@ -40,10 +41,12 @@ export const UserCreate = () => {
   const t = (key: string, def?: string) => translate(`custom.${key}`, def ? { _: def } : undefined);
 
   // Solo se manda lo que corresponde al rol elegido
-  const transformar = ({ usuario, password, rol, nombre, infante }: DatosUsuario) =>
+  const transformar = ({ usuario, password, rol, nombre, region, infante }: DatosUsuario) =>
     rol === "paciente"
       ? { usuario, password, rol, infante }
-      : { usuario, password, rol, nombre };
+      : rol === "doctor"
+        ? { usuario, password, rol, nombre, region }
+        : { usuario, password, rol, nombre };
 
   const fila = { display: "flex", gap: 2, width: "100%", flexWrap: "wrap" } as const;
   // Fecha LOCAL de hoy en AAAA-MM-DD (toISOString daría la fecha en UTC,
@@ -176,12 +179,23 @@ export const UserCreate = () => {
                 />
               </Box>
             ) : (
-              <TextInput
-                source="nombre"
-                label={t("users.name")}
-                validate={[required(), maxLength(100)]}
-                fullWidth
-              />
+              <>
+                <TextInput
+                  source="nombre"
+                  label={t("users.name")}
+                  validate={[required(), maxLength(100)]}
+                  fullWidth
+                />
+                {formData.rol === "doctor" && (
+                  <SelectInput
+                    source="region"
+                    label={t("common.region", "Región")}
+                    helperText={t("users.doctorRegionHelp", "El doctor solo verá a los pacientes de esta región")}
+                    validate={required()}
+                    choices={OPCIONES_REGION}
+                  />
+                )}
+              </>
             )
           }
         </FormDataConsumer>

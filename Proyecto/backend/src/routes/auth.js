@@ -37,15 +37,18 @@ router.post("/login", limiteLogin, async (req, res) => {
     await usuarios.updateOne({ _id: usuario._id }, { $set: { passwordHash: await hashPassword(password) } });
   }
 
+  // La región del doctor va dentro del token firmado: el servidor la usa para
+  // filtrar y nadie la puede cambiar sin invalidar la firma
+  const region = usuario.rol === "doctor" ? usuario.region : undefined;
   const token = jwt.sign(
-    { sub: usuario.usuario, nombre: usuario.nombre, rol: usuario.rol },
+    { sub: usuario.usuario, nombre: usuario.nombre, rol: usuario.rol, ...(region && { region }) },
     process.env.JWT_SECRET,
     { algorithm: "HS256", expiresIn: process.env.JWT_EXPIRES_IN ?? "1h" },
   );
 
   res.json({
     token,
-    usuario: { id: usuario.usuario, fullName: usuario.nombre, rol: usuario.rol },
+    usuario: { id: usuario.usuario, fullName: usuario.nombre, rol: usuario.rol, ...(region && { region }) },
   });
 });
 

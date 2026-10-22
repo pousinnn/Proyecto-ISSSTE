@@ -6,7 +6,7 @@
 // tiene CURP y datos personales de todos los niños.
 import { Router } from "express";
 import { getDb } from "../db.js";
-import { escaparRegex } from "./mediciones.js";
+import { escaparRegex, filtroAcceso } from "./mediciones.js";
 import { requiereRol } from "../middleware/auth.js";
 import { REGIONES } from "../regiones.js";
 import { ErrorValidacion } from "../validaciones.js";
@@ -36,6 +36,8 @@ router.get("/", async (req, res) => {
     const re = new RegExp(escaparRegex(q.trim()), "i");
     filtro.$or = [{ nombre: re }, { paterno: re }, { materno: re }, { curp: re }];
   }
+  // Al final: el doctor solo ve infantes de su región, pida lo que pida en la URL
+  Object.assign(filtro, filtroAcceso(req.usuario));
 
   const campo = CAMPOS_ORDENABLES.includes(_sort) ? (_sort === "id" ? "id_infante" : _sort) : "paterno";
   const inicio = Math.max(0, Number.parseInt(_start, 10) || 0);
@@ -56,7 +58,8 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const doc = Number.isInteger(id) && (await coleccion().findOne({ id_infante: id }));
+  // 404 (no 403) si es de otra región: así ni siquiera se revela que existe
+  const doc = Number.isInteger(id) && (await coleccion().findOne({ id_infante: id, ...filtroAcceso(req.usuario) }));
   if (!doc) return res.status(404).json({ error: "No encontrado" });
   res.json(aCliente(doc));
 });

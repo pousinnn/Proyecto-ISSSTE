@@ -13,13 +13,43 @@ const idValido = (id) => (ObjectId.isValid(id) ? new ObjectId(id) : null);
 
 export const escaparRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-export const filtroAcceso = (usuario) =>
-  usuario.rol === "paciente" ? { "paciente.usuario": usuario.sub } : {};
+// Control de acceso por registro. Sale del token firmado, no de la URL ni del body:
+//   paciente → solo sus mediciones
+//   doctor   → solo las de su región (sin región asignada no ve nada)
+//   admin    → todo
+// "__sin_region__" no coincide con ninguna región real: si al doctor le falta
+// la región, el filtro no devuelve nada en lugar de devolver todo.
+export const filtroAcceso = (usuario) => {
+  if (usuario.rol === "paciente") return { "paciente.usuario": usuario.sub };
+  if (usuario.rol === "doctor") return { region: usuario.region ?? "__sin_region__" };
+  return {};
+};
 
+// Pacientes cuya ficha del padrón (id_infante) es de la región indicada
+export async function pacientesDeRegion(region) {
+  const ids = await getDb()
+    .collection("infantes")
+    .find({ region }, { projection: { _id: 0, id_infante: 1 } })
+    .map((i) => i.id_infante)
+    .toArray();
+  return getDb()
+    .collection("usuarios")
+    .find({ rol: "paciente", id_infante: { $in: ids } }, { projection: { _id: 0, usuario: 1, nombre: 1 } })
+    .sort({ nombre: 1 })
+    .toArray();
+}
+
+const exigirRegionDoctor = (usuario) => {
+  if (usuario.rol === "doctor" && !usuario.region) {
+    const e = new ErrorValidacion("No tienes una región asignada; pide a un administrador que te la asigne");
+    e.status = 403;
+    throw e;
+  }
+};
 
 async function resolverPaciente(req) {
   if (req.usuario.rol === "paciente") {
-    
+
     return { usuario: req.usuario.sub, nombre: req.usuario.nombre };
   }
   const usuario = req.body?.paciente;
@@ -28,6 +58,14 @@ async function resolverPaciente(req) {
   }
   const paciente = await getDb().collection("usuarios").findOne({ usuario, rol: "paciente" });
   if (!paciente) throw new ErrorValidacion("El paciente seleccionado no existe");
+
+  // Un doctor solo puede capturar para pacientes de su región
+  if (req.usuario.rol === "doctor") {
+    const deSuRegion = await pacientesDeRegion(req.usuario.region);
+    if (!deSuRegion.some((p) => p.usuario === usuario)) {
+      throw new ErrorValidacion("Ese paciente no pertenece a tu región");
+    }
+  }
   return { usuario: paciente.usuario, nombre: paciente.nombre };
 }
 
@@ -41,7 +79,7 @@ export function rutasMediciones(nombre) {
   router.get("/", async (req, res) => {
     const { _start = "0", _end = "10", _sort = "fecha", _order = "DESC", q, id } = req.query;
 
-    const filtro = { ...filtroAcceso(req.usuario) };
+    const filtro = {};
     if (id !== undefined) {
       filtro._id = { $in: [id].flat().map(idValido).filter(Boolean) };
     }
@@ -55,6 +93,9 @@ export function rutasMediciones(nombre) {
       const re = new RegExp(escaparRegex(q.trim()), "i");
       filtro.$or = [{ zona: re }, { region: re }, { periodo: re }, { sexo: re }, { "paciente.nombre": re }];
     }
+    // El control de acceso se aplica AL FINAL para que ningún filtro de la URL
+    // (por ejemplo ?region=Sur) lo pueda sobrescribir
+    Object.assign(filtro, filtroAcceso(req.usuario));
 
     const campoOrden = CAMPOS_ORDENABLES.includes(_sort) ? (_sort === "id" ? "_id" : _sort) : "fecha";
     const inicio = Math.max(0, Number.parseInt(_start, 10) || 0);
@@ -81,7 +122,10 @@ export function rutasMediciones(nombre) {
   });
 
   router.post("/", async (req, res) => {
+    exigirRegionDoctor(req.usuario);
     const datos = validar(req.body ?? {});
+    // Lo que capture un doctor siempre queda en SU región
+    if (req.usuario.rol === "doctor") datos.region = req.usuario.region;
     const doc = {
       ...datos,
       paciente: await resolverPaciente(req),
@@ -96,9 +140,16 @@ export function rutasMediciones(nombre) {
     const _id = idValido(req.params.id);
     if (!_id) return res.status(404).json({ error: "No encontrado" });
 
+    exigirRegionDoctor(req.usuario);
+    // Primero el acceso: si no es de su región responde 404 antes de mirar los datos
+    if (!(await coleccion().findOne({ _id, ...filtroAcceso(req.usuario) }, { projection: { _id: 1 } }))) {
+      return res.status(404).json({ error: "No encontrado" });
+    }
     const datos = validar(req.body ?? {});
+    // El doctor solo edita mediciones de su región y no las puede mover a otra
+    if (req.usuario.rol === "doctor") datos.region = req.usuario.region;
     const doc = await coleccion().findOneAndUpdate(
-      { _id },
+      { _id, ...filtroAcceso(req.usuario) },
       {
         $set: {
           ...datos,
