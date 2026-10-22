@@ -139,8 +139,10 @@ if (!aplicar) {
 
 // --- 5. Guardar ---------------------------------------------------------------------
 const db = await conectar();
+// $set (y no replace): actualiza solo los campos que vienen de MySQL, así no se
+// borran los que se asignan en la app (por ejemplo `region`) al volver a importar.
 const operaciones = docs.map((doc) => ({
-  replaceOne: { filter: { id_infante: doc.id_infante }, replacement: doc, upsert: true },
+  updateOne: { filter: { id_infante: doc.id_infante }, update: { $set: doc }, upsert: true },
 }));
 
 let guardados = 0;
@@ -150,7 +152,7 @@ const errores = [];
 for (let k = 0; k < operaciones.length; k += 1000) {
   try {
     const r = await db.collection("infantes").bulkWrite(operaciones.slice(k, k + 1000), { ordered: false });
-    // upserted = nuevos; matched = ya existían y se reemplazaron
+    // upserted = nuevos; matched = ya existían y se actualizaron
     guardados += r.upsertedCount + r.matchedCount;
   } catch (e) {
     const r = e.result;

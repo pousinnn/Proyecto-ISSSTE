@@ -5,6 +5,7 @@
 // cualquier documento que no cumpla estas reglas, venga de donde venga
 // (el API, el importador, Compass o mongosh).
 import { CAMPOS, COLUMNAS_SIN_FECHA } from "./mapeo.js";
+import { REGIONES } from "../regiones.js";
 
 const tipo = (bsonType) => ({ bsonType });
 const MES = "^\\d{4}-(0[1-9]|1[0-2])$";
@@ -31,6 +32,8 @@ export const VALIDADOR = {
       paterno: { bsonType: "string", maxLength: 50 },
       materno: { bsonType: "string", maxLength: 50 },
       comentario: { bsonType: "string", maxLength: 500 },
+      // No viene de MySQL: la asigna un admin desde la app. Opcional.
+      region: { enum: REGIONES },
       inscripciones: {
         bsonType: "object",
         // Solo se aceptan claves "AAAA-MM" con valor numérico o vacío

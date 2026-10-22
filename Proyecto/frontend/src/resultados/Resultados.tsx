@@ -3,9 +3,11 @@ import {
   List,
   DataTable,
   SearchInput,
+  SelectInput,
   useRecordContext,
   useTranslate,
 } from "react-admin";
+import { OPCIONES_REGION } from "../regiones";
 
 import {
   Box,
@@ -166,6 +168,14 @@ const ResultadosFilters = () => {
       key="search"
       placeholder={translate("custom.common.search")}
     />,
+    <SelectInput
+      source="region"
+      alwaysOn
+      key="region"
+      label={translate("custom.common.region", { _: "Región" })}
+      choices={OPCIONES_REGION}
+      emptyText={translate("custom.common.allRegions", { _: "Todas" })}
+    />,
   ];
 };
 
@@ -255,6 +265,11 @@ export const Resultados = () => {
                 >
                   <ZonaField />
                 </DataTable.Col>
+
+                <DataTable.Col
+                  source="region"
+                  label={translate("custom.common.region", { _: "Región" })}
+                />
 
                 <DataTable.Col
                   source="contenido"

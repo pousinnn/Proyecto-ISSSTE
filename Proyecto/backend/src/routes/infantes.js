@@ -1,11 +1,15 @@
-// Padrón de infantes (solo lectura; los datos llegan con `npm run importar-padron`).
-//   GET /api/infantes?_start=0&_end=10&_sort=paterno&_order=ASC&q=texto&ebdi=12&activo=1
+// Padrón de infantes (los datos llegan con `npm run importar-padron`).
+//   GET /api/infantes?_start=0&_end=10&_sort=paterno&_order=ASC&q=texto&ebdi=12&activo=1&region=Sur
 //   GET /api/infantes/:id_infante
+//   PUT /api/infantes/:id_infante/region   { region }   (solo admin; único dato editable)
 // Acceso: admin y doctor (se aplica en server.js). Un paciente nunca ve el padrón:
 // tiene CURP y datos personales de todos los niños.
 import { Router } from "express";
 import { getDb } from "../db.js";
 import { escaparRegex } from "./mediciones.js";
+import { requiereRol } from "../middleware/auth.js";
+import { REGIONES } from "../regiones.js";
+import { ErrorValidacion } from "../validaciones.js";
 
 const router = Router();
 const coleccion = () => getDb().collection("infantes");
@@ -16,7 +20,7 @@ const aCliente = ({ _id, ...doc }) => ({ id: doc.id_infante, ...doc });
 const CAMPOS_ORDENABLES = ["id", "id_infante", "paterno", "nombre", "fnac", "ebdi", "freg"];
 
 router.get("/", async (req, res) => {
-  const { _start = "0", _end = "10", _sort = "paterno", _order = "ASC", q, ebdi, activo, id } = req.query;
+  const { _start = "0", _end = "10", _sort = "paterno", _order = "ASC", q, ebdi, activo, region, id } = req.query;
 
   const filtro = {};
   // getMany de react-admin: ?id=1&id=2
@@ -26,6 +30,7 @@ router.get("/", async (req, res) => {
   // Filtros exactos: se convierten a número, así no se puede inyectar un objeto
   if (typeof ebdi === "string" && /^\d+$/.test(ebdi)) filtro.ebdi = Number(ebdi);
   if (activo === "0" || activo === "1") filtro.activo = Number(activo);
+  if (typeof region === "string" && REGIONES.includes(region)) filtro.region = region;
 
   if (typeof q === "string" && q.trim()) {
     const re = new RegExp(escaparRegex(q.trim()), "i");
@@ -52,6 +57,19 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
   const doc = Number.isInteger(id) && (await coleccion().findOne({ id_infante: id }));
+  if (!doc) return res.status(404).json({ error: "No encontrado" });
+  res.json(aCliente(doc));
+});
+
+router.put("/:id/region", requiereRol("admin"), async (req, res) => {
+  const id = Number(req.params.id);
+  const region = req.body?.region;
+  if (!REGIONES.includes(region)) {
+    throw new ErrorValidacion(`region debe ser una de: ${REGIONES.join(", ")}`);
+  }
+  const doc =
+    Number.isInteger(id) &&
+    (await coleccion().findOneAndUpdate({ id_infante: id }, { $set: { region } }, { returnDocument: "after" }));
   if (!doc) return res.status(404).json({ error: "No encontrado" });
   res.json(aCliente(doc));
 });

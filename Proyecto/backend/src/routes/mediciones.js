@@ -31,7 +31,7 @@ async function resolverPaciente(req) {
   return { usuario: paciente.usuario, nombre: paciente.nombre };
 }
 
-const CAMPOS_ORDENABLES = ["id", "fecha", "zona", "periodo", "sexo"];
+const CAMPOS_ORDENABLES = ["id", "fecha", "zona", "region", "periodo", "sexo"];
 
 export function rutasMediciones(nombre) {
   const router = Router();
@@ -45,7 +45,7 @@ export function rutasMediciones(nombre) {
     if (id !== undefined) {
       filtro._id = { $in: [id].flat().map(idValido).filter(Boolean) };
     }
-    for (const campo of ["zona", "periodo", "sexo"]) {
+    for (const campo of ["zona", "periodo", "sexo", "region"]) {
       if (typeof req.query[campo] === "string") filtro[campo] = req.query[campo];
     }
     if (req.usuario.rol !== "paciente" && typeof req.query.paciente === "string") {
@@ -53,7 +53,7 @@ export function rutasMediciones(nombre) {
     }
     if (typeof q === "string" && q.trim()) {
       const re = new RegExp(escaparRegex(q.trim()), "i");
-      filtro.$or = [{ zona: re }, { periodo: re }, { sexo: re }, { "paciente.nombre": re }];
+      filtro.$or = [{ zona: re }, { region: re }, { periodo: re }, { sexo: re }, { "paciente.nombre": re }];
     }
 
     const campoOrden = CAMPOS_ORDENABLES.includes(_sort) ? (_sort === "id" ? "_id" : _sort) : "fecha";

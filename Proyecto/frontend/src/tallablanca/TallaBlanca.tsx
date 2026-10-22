@@ -34,6 +34,7 @@ import {
 
 import "./TallaBlanca.css";
 import { SelectorPaciente } from "../SelectorPaciente";
+import { SelectorRegion } from "../SelectorRegion";
 
 type Sexo = "niño" | "niña";
 type Unidad = "cm" | "m" | "in";
@@ -53,6 +54,7 @@ export const TallaBlanca = () => {
   const [sexo, setSexo] = useState<Sexo>("niño");
   const [periodo, setPeriodo] = useState("");
   const [zona, setZona] = useState("");
+  const [region, setRegion] = useState("");
   const [paciente, setPaciente] = useState("");
 
   const [alturaPadre, setAlturaPadre] = useState("");
@@ -131,7 +133,7 @@ export const TallaBlanca = () => {
 
   // Guardar
   const guardar = () => {
-    if (!periodo || !zona.trim()) {
+    if (!periodo || !region || !zona.trim()) {
       notify(t("notifications.required"), {
         type: "warning",
       });
@@ -144,6 +146,7 @@ export const TallaBlanca = () => {
     if (!datos) return;
 
     const registro = {
+      region,
       paciente,
       sexo,
       periodo,
@@ -439,6 +442,15 @@ export const TallaBlanca = () => {
                 <MenuItem value="2026-2">2026-2</MenuItem>
                 <MenuItem value="2027-1">2027-1</MenuItem>
               </TextField>
+
+              {/* REGION */}
+
+              <SelectorRegion
+                value={region}
+                onChange={setRegion}
+                className="talla-section"
+                inputSx={{ ...inputStyle, mb: 3 }}
+              />
 
               {/* PACIENTE (solo doctor y admin) */}
 

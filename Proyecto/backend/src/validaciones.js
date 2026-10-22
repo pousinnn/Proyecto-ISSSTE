@@ -1,3 +1,4 @@
+import { REGIONES } from "./regiones.js";
 
 //Validar que la información proporcionada por el usuario
 export class ErrorValidacion extends Error {
@@ -68,6 +69,7 @@ const edadEnMeses = (fechaNacimiento) => {
 const comunes = (d) => ({
   sexo: elegir(d.sexo, SEXOS, "sexo"),
   periodo: elegir(d.periodo, PERIODOS, "periodo"),
+  region: elegir(d.region, REGIONES, "region"),
   zona: texto(d.zona, "zona"),
 });
 

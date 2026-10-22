@@ -33,6 +33,7 @@ import {
 
 import "./PerimetroCefalico.css";
 import { SelectorPaciente } from "../SelectorPaciente";
+import { SelectorRegion } from "../SelectorRegion";
 
 type Sexo = "niño" | "niña";
 
@@ -51,6 +52,7 @@ export const PerimetroCefalico = () => {
   const [sexo, setSexo] = useState<Sexo>("niño");
   const [periodo, setPeriodo] = useState("");
   const [zona, setZona] = useState("");
+  const [region, setRegion] = useState("");
   const [paciente, setPaciente] = useState("");
 
   const [unidad, setUnidad] = useState("cm");
@@ -110,7 +112,7 @@ export const PerimetroCefalico = () => {
 
   // Guardar registro
   const guardar = () => {
-    if (!periodo || !zona.trim()) {
+    if (!periodo || !region || !zona.trim()) {
       notify(t("notifications.required"), {
         type: "warning",
       });
@@ -122,6 +124,7 @@ export const PerimetroCefalico = () => {
     if (medidaCm === null) return;
 
     const registro = {
+      region,
       paciente,
       sexo,
       periodo,
@@ -371,6 +374,15 @@ export const PerimetroCefalico = () => {
                   2027-1
                 </MenuItem>
               </TextField>
+
+              {/* REGION */}
+
+              <SelectorRegion
+                value={region}
+                onChange={setRegion}
+                className="perimetro-section"
+                inputSx={{ ...inputStyle, mb: 3 }}
+              />
 
               {/* PACIENTE (solo doctor y admin) */}
 

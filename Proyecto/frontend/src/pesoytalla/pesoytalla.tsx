@@ -33,6 +33,7 @@ import {
 
 import "./pesoytalla.css";
 import { SelectorPaciente } from "../SelectorPaciente";
+import { SelectorRegion } from "../SelectorRegion";
 import { GraficaCrecimiento } from "./GraficaCrecimiento";
 import {
   cargarTablasCDC,
@@ -69,6 +70,7 @@ export const PesoYTalla = () => {
   const [fechaNacimiento, setFechaNacimiento] = useState("");
   const [periodo, setPeriodo] = useState("");
   const [zona, setZona] = useState("");
+  const [region, setRegion] = useState("");
   const [paciente, setPaciente] = useState("");
 
   const [altura, setAltura] = useState("");
@@ -190,7 +192,7 @@ export const PesoYTalla = () => {
 
   // Guardar registro
   const guardar = () => {
-    if (!periodo || !zona.trim()) {
+    if (!periodo || !region || !zona.trim()) {
       notify(t("notifications.required"), {
         type: "warning",
       });
@@ -202,6 +204,7 @@ export const PesoYTalla = () => {
     if (!datos) return;
 
     const registro = {
+      region,
       paciente,
       sexo,
       fechaNacimiento,
@@ -461,6 +464,15 @@ export const PesoYTalla = () => {
                   2027-1
                 </MenuItem>
               </TextField>
+
+              {/* REGION */}
+
+              <SelectorRegion
+                value={region}
+                onChange={setRegion}
+                className="peso-section"
+                inputSx={{ ...inputStyle, mb: 3 }}
+              />
 
               {/* PACIENTE (solo doctor y admin) */}
 

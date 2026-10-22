@@ -9,10 +9,30 @@ import {
     TextField,
     NumberField,
     Labeled,
+    SelectInput,
+    fetchUtils,
+    useNotify,
+    usePermissions,
     useRecordContext,
+    useRefresh,
     useTranslate,
 } from "react-admin";
-import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { useState } from "react";
+import {
+    Box,
+    Button,
+    Chip,
+    MenuItem,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    TextField as MuiTextField,
+    Typography,
+} from "@mui/material";
+import { API_URL } from "../dataProvider";
+import { OPCIONES_REGION, REGIONES } from "../regiones";
 
 // Las fechas vienen a medianoche UTC; se muestran en UTC para que no se recorran un día
 const FECHA = { timeZone: "UTC" } as const;
@@ -97,12 +117,80 @@ const Inscripciones = () => {
     );
 };
 
+// Región del infante: el admin la puede asignar; los demás solo la ven
+const RegionInfante = () => {
+    const r = useRecordContext();
+    const { permissions } = usePermissions();
+    const translate = useTranslate();
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const [region, setRegion] = useState<string>("");
+    const [guardando, setGuardando] = useState(false);
+
+    if (!r) return null;
+    if (permissions !== "admin") return <>{r.region || "—"}</>;
+
+    const guardar = async () => {
+        setGuardando(true);
+        try {
+            await fetchUtils.fetchJson(`${API_URL}/infantes/${r.id}/region`, {
+                method: "PUT",
+                body: JSON.stringify({ region }),
+                headers: new Headers({ Authorization: `Bearer ${localStorage.getItem("token")}` }),
+            });
+            notify(translate("custom.padron.regionSaved", { _: "Región guardada" }), { type: "success" });
+            refresh();
+        } catch (e) {
+            const mensaje = (e as { body?: { error?: string } })?.body?.error;
+            notify(mensaje ?? translate("custom.notifications.error", { _: "Error" }), { type: "error" });
+        } finally {
+            setGuardando(false);
+        }
+    };
+
+    return (
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <MuiTextField
+                select
+                size="small"
+                value={region || r.region || ""}
+                onChange={(e) => setRegion(e.target.value)}
+                sx={{ minWidth: 180 }}
+                slotProps={{ select: { displayEmpty: true } }}
+            >
+                <MenuItem value="" disabled>
+                    {translate("custom.common.selectRegion", { _: "Selecciona una región" })}
+                </MenuItem>
+                {REGIONES.map((x) => (
+                    <MenuItem key={x} value={x}>{x}</MenuItem>
+                ))}
+            </MuiTextField>
+            <Button
+                variant="contained"
+                size="small"
+                onClick={guardar}
+                disabled={guardando || !region || region === r.region}
+            >
+                {translate("custom.common.save", { _: "Guardar" })}
+            </Button>
+        </Box>
+    );
+};
+
 export const PadronList = () => {
     const translate = useTranslate();
     const t = (k: string, def: string) => translate(`custom.padron.${k}`, { _: def });
 
     const filtros = [
         <SearchInput source="q" alwaysOn key="q" placeholder={t("search", "Nombre o CURP")} />,
+        <SelectInput
+            source="region"
+            key="region"
+            alwaysOn
+            label={translate("custom.common.region", { _: "Región" })}
+            choices={OPCIONES_REGION}
+            emptyText={translate("custom.common.allRegions", { _: "Todas" })}
+        />,
         <TextInput source="ebdi" key="ebdi" label="EBDI" />,
     ];
 
@@ -124,6 +212,7 @@ export const PadronList = () => {
                     <DateField source="fnac" options={FECHA} />
                 </DataTable.Col>
                 <DataTable.Col source="ebdi" label="EBDI" />
+                <DataTable.Col source="region" label={translate("custom.common.region", { _: "Región" })} disableSort />
                 <DataTable.Col source="activo" label={t("status", "Estado")} disableSort>
                     <Activo />
                 </DataTable.Col>
@@ -147,6 +236,9 @@ export const PadronShow = () => {
                 <TextField source="genero" label={t("gender", "Género")} />
                 <NumberField source="ebdi" label="EBDI" />
                 <TextField source="ur" label="UR" />
+                <Labeled label={translate("custom.common.region", { _: "Región" })}>
+                    <RegionInfante />
+                </Labeled>
                 {/* TextField y no NumberField: es un identificador, no una cantidad (sin comas) */}
                 <TextField source="matricula" label={t("parentId", "Matrícula del derechohabiente")} />
                 <TextField source="estrato" label={t("stratum", "Estrato")} />

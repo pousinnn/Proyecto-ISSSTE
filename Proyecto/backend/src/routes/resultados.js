@@ -25,11 +25,15 @@ const formatearFecha = (fecha) =>
   fecha.toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short", timeZone: "America/Mexico_City" });
 
 router.get("/", async (req, res) => {
-  const { _start = "0", _end = "10", _sort = "fecha", _order = "DESC", q } = req.query;
+  const { _start = "0", _end = "10", _sort = "fecha", _order = "DESC", q, region } = req.query;
+
+  const filtro = { ...filtroAcceso(req.usuario) };
+  // Filtro por región (solo texto, para que no se pueda inyectar un objeto)
+  if (typeof region === "string" && region) filtro.region = region;
 
   const grupos = await Promise.all(
     Object.entries(FUENTES).map(async ([coleccion, fuente]) => {
-      const docs = await getDb().collection(coleccion).find(filtroAcceso(req.usuario)).toArray();
+      const docs = await getDb().collection(coleccion).find(filtro).toArray();
       return docs.map((doc) => {
         const { id, ...d } = aCliente(doc);
         return {
@@ -39,6 +43,7 @@ router.get("/", async (req, res) => {
           capturadoPor: d.creadoPor?.nombre ?? "",
           titulo: fuente.titulo,
           zona: d.zona,
+          region: d.region ?? "",
           periodo: d.periodo,
           sexo: d.sexo,
           contenido: fuente.contenido(d),
@@ -53,10 +58,12 @@ router.get("/", async (req, res) => {
 
   if (typeof q === "string" && q.trim()) {
     const re = new RegExp(escaparRegex(q.trim()), "i");
-    filas = filas.filter((f) => [f.nombre, f.titulo, f.zona, f.contenido, f.periodo].some((v) => re.test(v ?? "")));
+    filas = filas.filter((f) =>
+      [f.nombre, f.titulo, f.zona, f.region, f.contenido, f.periodo].some((v) => re.test(v ?? "")),
+    );
   }
 
-  const campo = ["nombre", "titulo", "zona", "periodo"].includes(_sort) ? _sort : "fechaOrden";
+  const campo = ["nombre", "titulo", "zona", "region", "periodo"].includes(_sort) ? _sort : "fechaOrden";
   const signo = _order === "ASC" ? 1 : -1;
   filas.sort((a, b) => (a[campo] > b[campo] ? signo : a[campo] < b[campo] ? -signo : 0));
 
