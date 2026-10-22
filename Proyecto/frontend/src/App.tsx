@@ -1,7 +1,7 @@
 import { Admin, Resource} from "react-admin";
 import { dataProvider } from "./dataProvider";
 import { authProvider} from "./authProvider";
-import { Dashboard } from "./Dashboard";
+
 
 
 import spanishMessages from "./spanishMessages";
@@ -64,7 +64,7 @@ export const App = () =>(
     //loginPage = {MyLoginPage} 
     dataProvider = {dataProvider}
     authProvider={authProvider}
-    dashboard={Dashboard}
+    //dashboard={Dashboard}
     i18nProvider={i18nProvider}>
         {/* USUARIOS */}
         <Resource name="users" create={UserCreate} />

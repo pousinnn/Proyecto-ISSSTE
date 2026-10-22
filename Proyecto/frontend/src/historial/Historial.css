@@ -1,0 +1,101 @@
+
+/* PÁGINA PRINCIPAL */
+
+.historial-page {
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* CONTENEDOR */
+
+.historial-container {
+  width: 100%;
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+
+/* CONTENIDO */
+
+.historial-content {
+  width: 100%;
+  min-width: 0;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* TABLA */
+
+.historial-content .MuiTableContainer-root {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.historial-content .MuiTableCell-root {
+  padding: 14px 12px;
+}
+
+.historial-content .MuiTableCell-head {
+  font-weight: bold;
+}
+
+.historial-content .MuiTableRow-root {
+  transition: background-color 0.2s ease;
+}
+
+/* TIPO DE REGISTRO */
+
+.historial-content .MuiChip-root {
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+/* BOTONES */
+
+.historial-content .MuiButton-root {
+  text-transform: none;
+  border-radius: 8px;
+}
+
+/* BUSCADOR */
+
+.historial-content .MuiTextField-root {
+  border-radius: 8px;
+}
+
+/* PAGINACIÓN */
+
+.historial-content .MuiTablePagination-root {
+  width: 100%;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .historial-page {
+    padding: 16px;
+  }
+
+  .historial-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .historial-page {
+    padding: 10px;
+  }
+
+  .historial-content {
+    padding: 12px;
+  }
+
+  .historial-content .MuiTableCell-root {
+    padding: 10px 8px;
+  }
+
+  .historial-content .MuiButton-root {
+    min-width: 0;
+  }
+}
