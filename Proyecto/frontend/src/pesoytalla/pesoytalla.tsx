@@ -330,7 +330,7 @@ export const PesoYTalla = () => {
                   color: "text.primary",
                 }}
               >
-                014121305
+                
               </Typography>
             </Box>
 

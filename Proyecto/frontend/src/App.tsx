@@ -1,7 +1,7 @@
 import { Admin, Resource} from "react-admin";
 import { dataProvider } from "./dataProvider";
 import { authProvider} from "./authProvider";
-import { Dashboard } from "./Dashboard";
+
 
 
 import spanishMessages from "./spanishMessages";
@@ -41,6 +41,10 @@ import { ChildCare } from "@mui/icons-material";
 import { Historial } from "./historial/Historial";
 import { History } from "@mui/icons-material";
 
+//HISTORIAL NUTRICION
+import { HistorialNutricion } from "./historialnutricion/HistorialNutricion";
+import { Restaurant } from "@mui/icons-material";
+
 //Cambia el idioma entre español e ingles
 const i18nProvider = polyglotI18nProvider(
     (locale) => {
@@ -64,7 +68,7 @@ export const App = () =>(
     //loginPage = {MyLoginPage} 
     dataProvider = {dataProvider}
     authProvider={authProvider}
-    dashboard={Dashboard}
+    //dashboard={Dashboard}
     i18nProvider={i18nProvider}>
         {/* El menú cambia según el rol (el servidor también lo revisa) */}
         {(permissions: string) => [
@@ -87,6 +91,9 @@ export const App = () =>(
 
             //HISTORIAL
             <Resource key="historial" name="historial" list={Historial} icon={History} />,
+
+            //HISTORIAL NUTRICION
+            <Resource key="historialnutricion" name="historialnutricion" list={HistorialNutricion} icon={Restaurant} />,
 
             //PADRON: admin, coordinador (su región) y estancia (su EBDI)
             ...(["admin", "coordinador", "estancia"].includes(permissions)
