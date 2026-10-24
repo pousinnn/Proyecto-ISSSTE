@@ -171,10 +171,9 @@ const VerDetalles = () => {
 export const Historial = () => {
   const translate = useTranslate();
 
-  // Solo el administrador puede eliminar registros
   const { permissions } = usePermissions();
-  //Roles que pueden editar y borrar (el servidor revisa que sea de su región o EBDI)
-  const puedeEditar = ["admin", "coordinador", "estancia"].includes(permissions);
+  //Solo el admin puede editar y borrar (el servidor también lo revisa)
+  const puedeEditar = permissions === "admin";
 
   const filters = [
     <SearchInput
@@ -284,7 +283,7 @@ export const Historial = () => {
                   <Stack direction="row" spacing={1}>
                     <VerDetalles />
 
-                    {/* Editar y borrar: admin, coordinador (su región) y estancia (su EBDI) */}
+                    {/* Editar y borrar: solo el admin */}
                     {puedeEditar && <EditarMedicion />}
                     {puedeEditar && (
                       <DeleteButton

@@ -75,7 +75,10 @@ export const App = () =>(
             //USUARIOS
             <Resource key="users" name="users" create={UserCreate} />,
             //RESULTADOS
-            <Resource key="resultados" name="resultados" list={Resultados} icon={Assessment} />,
+            //Los padres, madres o tutores no ven Resultados
+            ...(permissions !== "familia"
+                ? [<Resource key="resultados" name="resultados" list={Resultados} icon={Assessment} />]
+                : []),
 
             //CAPTURA: el coordinador regional solo consulta, no captura
             ...(permissions !== "coordinador"

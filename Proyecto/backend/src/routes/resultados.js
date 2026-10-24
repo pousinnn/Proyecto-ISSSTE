@@ -97,7 +97,7 @@ export const rutasHistorial = rutaListado(({ fechaOrden, contenido, ...fila }) =
   resultado: contenido,
 }));
 
-//Borra un registro del historial: admin todos, coordinador su región, estancia su EBDI
+//Borra un registro del historial: solo el admin
 rutasHistorial.delete("/:id", requiereRol(...ROLES_QUE_EDITAN), async (req, res) => {
   const [tipo, idTexto] = req.params.id.split("-");
   if (!(tipo in FUENTES) || !ObjectId.isValid(idTexto)) {
