@@ -153,7 +153,7 @@ const edadEnMeses = (fechaISO: string): number => {
   return (Date.now() - nacimiento.getTime()) / 86400000 / 30.4375;
 };
 
-// Curva de percentiles (en cm) interpolada a la edad exacta
+// Curva de percentiles en cm interpolada a la edad exacta
 const curvaPorEdad = (sexo: Sexo, meses: number): number[] | null => {
   const filas = TABLA_PC[sexo];
   if (meses < filas[0][0] || meses > filas[filas.length - 1][0]) return null;
@@ -203,7 +203,7 @@ const cdfNormal = (z: number): number => {
   return z > 0 ? 1 - p : p;
 };
 
-// Categoría por z-score (ajusta aquí los puntos de corte si hace falta)
+// Categoría por z-score
 const clasificarPC = (z: number): { categoria: string; nivel: Nivel } => {
   if (z < -3) return { categoria: "Microcefalia severa", nivel: "error" };
   if (z < -2) return { categoria: "Microcefalia", nivel: "warning" };
