@@ -1,13 +1,13 @@
-//Reglas que mongodb revisa antes de guardar un infante (IA)
+//reglas que mongodb revisa antes de guardar un infante (IA)
 import { CAMPOS, COLUMNAS_SIN_FECHA } from "./mapeo.js";
 import { REGIONES } from "../regiones.js";
 
 const tipo = (bsonType) => ({ bsonType });
 const MES = "^\\d{4}-(0[1-9]|1[0-2])$";
-//Formato del CURP, también puede ir vacío
+//formato del CURP, también puede ir vacío
 const CURP = "^$|^[A-Z]{4}\\d{6}[HMX][A-Z]{5}[A-Z0-9]\\d$";
 
-//Tipo de dato de cada campo (IA)
+//tipo de dato de cada campo (IA)
 const propiedades = {
   ...Object.fromEntries(CAMPOS.ENTEROS.map((c) => [c, tipo(["int", "long", "null"])])),
   ...Object.fromEntries(CAMPOS.FECHAS.map((c) => [c, tipo(["date", "null"])])),
@@ -15,7 +15,7 @@ const propiedades = {
   ...Object.fromEntries(CAMPOS.TEXTOS.map((c) => [c, tipo("string")])),
 };
 
-//Validador de la colección infantes (IA)
+//validador de la colección infantes (IA)
 export const VALIDADOR = {
   $jsonSchema: {
     bsonType: "object",
@@ -56,7 +56,7 @@ export async function prepararInfantes(db) {
   }
 
   const infantes = db.collection("infantes");
-  //El id_infante no se puede repetir (IA)
+  //El id_infante no se puede repetir 
   await infantes.createIndex({ id_infante: 1 }, { unique: true });
   //El CURP no se puede repetir, pero puede ir vacío (IA)
   await infantes.createIndex(

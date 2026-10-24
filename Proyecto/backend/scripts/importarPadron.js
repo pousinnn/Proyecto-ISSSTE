@@ -1,4 +1,4 @@
-//Pasa el padrón de MySQL a mongodb, con --aplicar sí lo guarda (IA)
+//pasamos el padron de sql a mongodb (IA)
 import { readFileSync } from "node:fs";
 import { conectar, desconectar } from "../src/db.js";
 import { filaAInfante, COLUMNAS_CONOCIDAS } from "../src/infantes/mapeo.js";
@@ -11,7 +11,7 @@ if (!archivo) {
   process.exit(1);
 }
 
-//Lee el archivo cuidando las ñ y los acentos
+//leer archivo
 const bytes = readFileSync(archivo);
 let sql;
 try {
@@ -21,7 +21,7 @@ try {
   console.log("Aviso: el archivo no es UTF-8, se leyó como latin1.");
 }
 
-//Saca las columnas de la tabla
+//sacamos columnas
 const create = sql.match(/CREATE TABLE `padron` \(([\s\S]*?)\n\)/);
 if (!create) {
   console.error("No encontré `CREATE TABLE `padron`` en el archivo.");
@@ -29,16 +29,16 @@ if (!create) {
 }
 const columnasTabla = [...create[1].matchAll(/^\s*`(\w+)`/gm)].map((m) => m[1]);
 
-//Avisa si hay columnas que no conocemos
+//en caso de columnas que no conocemos
 const desconocidas = columnasTabla.filter((c) => !COLUMNAS_CONOCIDAS.has(c));
 if (desconocidas.length) {
   console.log(`Aviso: estas columnas no están en el mapeo y se van a ignorar: ${desconocidas.join(", ")}`);
 }
 
-//Caracteres especiales de MySQL
+//para caracteres especiales
 const ESCAPES = { 0: "\0", n: "\n", r: "\r", t: "\t", Z: "\x1a", b: "\b" };
 
-//Lee los valores de los INSERT letra por letra
+//valores INSERT
 function leerValores(texto, inicio) {
   const filas = [];
   let i = inicio;
@@ -56,7 +56,7 @@ function leerValores(texto, inicio) {
     const fila = [];
     while (true) {
       saltarEspacios();
-      //Lee un texto entre comillas
+      //para las comillas
       if (texto[i] === "'") {
         let valor = "";
         i++;
@@ -66,7 +66,7 @@ function leerValores(texto, inicio) {
             valor += ESCAPES[sig] ?? sig;
             i += 2;
           } else if (texto[i] === "'") {
-            valor += "'"; // '' dentro de un texto = una comilla
+            valor += "'"; 
             i += 2;
           } else {
             valor += texto[i++];
@@ -75,7 +75,7 @@ function leerValores(texto, inicio) {
         i++;
         fila.push(valor);
       } else {
-        //Lee un número o NULL
+        //numeros o null
         let token = "";
         while (texto[i] !== "," && texto[i] !== ")") token += texto[i++];
         token = token.trim();
@@ -91,12 +91,12 @@ function leerValores(texto, inicio) {
   throw new Error("El archivo terminó a mitad de un INSERT");
 }
 
-//Busca todos los INSERT del padrón y arma los renglones
+//armamos los renglones
 const filas = [];
 const reInsert = /INSERT INTO `padron`(?:\s*\(([^)]*)\))?\s*VALUES\s*/g;
 let m;
 while ((m = reInsert.exec(sql))) {
-  //Si el INSERT trae sus columnas se usan esas
+  //por si ya hay colummas en insert
   const columnas = m[1] ? m[1].split(",").map((c) => c.trim().replace(/`/g, "")) : columnasTabla;
   const { filas: valores, fin } = leerValores(sql, reInsert.lastIndex);
   for (const v of valores) {
@@ -116,10 +116,10 @@ if (filas.length === 0) {
   process.exit(0);
 }
 
-//Convierte los renglones a infantes
+//convertimos los renglones a infante
 const docs = filas.map(filaAInfante);
 
-//Muestra un ejemplo con el CURP tapado
+//ejemplo de curp
 const ejemplo = { ...docs[0] };
 if (ejemplo.curp) ejemplo.curp = `${ejemplo.curp.slice(0, 4)}**************`;
 ejemplo.inscripciones = `{ ${Object.keys(docs[0].inscripciones).length} meses }`;
@@ -131,9 +131,9 @@ if (!aplicar) {
   process.exit(0);
 }
 
-//Guarda en mongodb
+//guardamos en mongodb
 const db = await conectar();
-//Solo actualiza los campos de MySQL para no borrar la región
+//actulizamos y no borramos 
 const operaciones = docs.map((doc) => ({
   updateOne: { filter: { id_infante: doc.id_infante }, update: { $set: doc }, upsert: true },
 }));

@@ -1,4 +1,4 @@
-//crear usuario npm run crear-usuario -- USUARIO "NOMBRE" CONTRASEÑA ROL [REGION o EBDI]
+//crear usuario npm run crear-usuario 
 import { conectar, desconectar } from "../src/db.js";
 import { hashPassword } from "../src/passwords.js";
 import { REGIONES } from "../src/regiones.js";
@@ -6,7 +6,7 @@ import { ROLES, LISTA_ROLES } from "../src/roles.js";
 
 const [usuario, nombre, password, rol = ROLES.FAMILIA, extra] = process.argv.slice(2);
 
-//Revisa los datos antes de crear el usuario
+//revisa los datos antes de crear el usuario
 if (!usuario || !nombre || !password) {
   console.error(`Uso: npm run crear-usuario -- <usuario> "<Nombre completo>" <contraseña> [${LISTA_ROLES.join("|")}] ["<región>" si es coordinador | <EBDI> si es estancia]`);
   process.exit(1);
@@ -19,7 +19,7 @@ if (!LISTA_ROLES.includes(rol)) {
   console.error(`El rol debe ser uno de: ${LISTA_ROLES.join(", ")}`);
   process.exit(1);
 }
-//El coordinador necesita región y la estancia su número de EBDI
+//el coordinador necesita region y la estancia su numero de EBDI
 if (rol === ROLES.COORDINADOR && !REGIONES.includes(extra)) {
   console.error(`Un coordinador necesita región (${REGIONES.join(", ")}), ej.: ... coordinador "Centro Norte"`);
   process.exit(1);
@@ -31,7 +31,7 @@ if (rol === ROLES.ESTANCIA && !(Number.isInteger(ebdi) && ebdi >= 1 && ebdi <= 9
 }
 
 
-//Guarda el usuario con la contraseña en hash, si ya existe lo actualiza
+//guarda el usuario con la contraseña en hash, si ya existe lo actualiza
 const db = await conectar();
 const passwordHash = await hashPassword(password);
 const datos = {
