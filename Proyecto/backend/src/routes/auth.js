@@ -16,10 +16,10 @@ const limiteLogin = rateLimit({
   message: { error: "Demasiados intentos. Espera 15 minutos." },
 });
 
-//checar el hash y el token del usuario
+//checar el hash y el token del usuario (IA)
 const HASH_FALSO = await hashPassword("usuario-inexistente");
 
-//Inicio de sesión
+//Inicio de sesión (IA)
 router.post("/login", limiteLogin, async (req, res) => {
   const { username, password } = req.body ?? {};
 
@@ -27,7 +27,7 @@ router.post("/login", limiteLogin, async (req, res) => {
     return res.status(400).json({ error: "Usuario y contraseña son obligatorios" });
   }
 
-  //Busca al usuario y revisa la contraseña
+  //Busca al usuario y revisa la contraseña (IA)
   const usuarios = getDb().collection("usuarios");
   const usuario = await usuarios.findOne({ usuario: username.trim() });
   const { valida, rehacer } = await verificarPassword(password, usuario?.passwordHash ?? HASH_FALSO);
@@ -36,12 +36,12 @@ router.post("/login", limiteLogin, async (req, res) => {
     return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
   }
 
-  //Actualiza el hash si es viejo
+  //Actualiza el hash si es viejo (IA)
   if (rehacer) {
     await usuarios.updateOne({ _id: usuario._id }, { $set: { passwordHash: await hashPassword(password) } });
   }
 
-  //Crea el token con la región del coordinador o la EBDI de la estancia para que no la puedan cambiar
+  //Crea el token con la región del coordinador o la EBDI de la estancia para que no la puedan cambiar (IA)
   const extra = {
     ...(usuario.rol === ROLES.COORDINADOR && usuario.region && { region: usuario.region }),
     ...(usuario.rol === ROLES.ESTANCIA && usuario.ebdi && { ebdi: usuario.ebdi }),

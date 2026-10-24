@@ -112,7 +112,7 @@ const aFecha = (v) => {
 //Convierte a texto
 const aTexto = (v) => (v === null || v === undefined ? "" : String(v));
 
-//Convierte un renglón de MySQL en un infante
+//Convierte un renglón de MySQL en un infante (IA)
 export function filaAInfante(fila) {
   const doc = {};
   for (const c of ENTEROS) if (c in fila) doc[c] = aEntero(fila[c]);

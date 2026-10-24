@@ -45,7 +45,7 @@ app.get("/api/salud", (_req, res) => res.json({ ok: true }));
 app.use("/api", rutasAuth);
 
 
-//Desde aquí todas las rutas piden iniciar sesión y el rol correcto
+//Desde aquí todas las rutas piden iniciar sesión y el rol correcto (IA)
 app.use("/api", requiereLogin);
 app.use("/api/resultados", rutasResultados);
 app.use("/api/historial", rutasHistorial);
@@ -75,7 +75,7 @@ app.use((err, _req, res, _next) => {
 
 const puerto = Number(process.env.PORT ?? 3000);
 
-//Conecta mongodb y prende el servidor
+//Conecta mongodb y prende el servidor (IA)
 await conectar();
 app.listen(puerto, () => {
   console.log(`API escuchando en http://localhost:${puerto}/api`);

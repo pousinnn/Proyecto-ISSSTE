@@ -1,4 +1,4 @@
-//Pasa el padrón de MySQL a mongodb, con --aplicar sí lo guarda
+//Pasa el padrón de MySQL a mongodb, con --aplicar sí lo guarda (IA)
 import { readFileSync } from "node:fs";
 import { conectar, desconectar } from "../src/db.js";
 import { filaAInfante, COLUMNAS_CONOCIDAS } from "../src/infantes/mapeo.js";

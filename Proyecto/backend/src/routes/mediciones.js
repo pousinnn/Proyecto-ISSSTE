@@ -33,7 +33,7 @@ export async function familiasDe(filtroInfante) {
     .toArray();
 }
 
-//Lo que cada rol puede ver del padrón: coordinador su región, estancia su EBDI
+//Lo que cada rol puede ver del padrón: coordinador su región, estancia su EBDI (IA)
 export const filtroInfantes = (usuario) => {
   if (usuario.rol === ROLES.ADMIN) return {};
   if (usuario.rol === ROLES.COORDINADOR) return { region: usuario.region ?? "__sin_region__" };
@@ -41,7 +41,7 @@ export const filtroInfantes = (usuario) => {
   return { _id: { $exists: false } };
 };
 
-//Revisa que cada quien solo vea sus mediciones; un rol desconocido no ve nada
+//Revisa que cada quien solo vea sus mediciones; un rol desconocido no ve nada (IA)
 export const filtroAcceso = async (usuario) => {
   if (usuario.rol === ROLES.ADMIN) return {};
   if (usuario.rol === ROLES.FAMILIA) return { "paciente.usuario": usuario.sub };
@@ -53,7 +53,7 @@ export const filtroAcceso = async (usuario) => {
   return { _id: { $exists: false } };
 };
 
-//Roles que pueden corregir o borrar mediciones (cada uno dentro de su alcance)
+//Roles que pueden corregir o borrar mediciones (cada uno dentro de su alcance) (IA)
 export const ROLES_QUE_EDITAN = [ROLES.ADMIN, ROLES.COORDINADOR, ROLES.ESTANCIA];
 
 //La estancia necesita tener su EBDI asignada
@@ -96,7 +96,7 @@ function regionDeLaMedicion(req, infante) {
 //Campos por los que se puede ordenar
 const CAMPOS_ORDENABLES = ["id", "fecha", "zona", "region", "periodo", "sexo"];
 
-//Crea las rutas de cada tipo de medición
+//Crea las rutas de cada tipo de medición (IA)
 export function rutasMediciones(nombre) {
   const router = Router();
   const coleccion = () => getDb().collection(nombre);
@@ -122,7 +122,7 @@ export function rutasMediciones(nombre) {
       const re = new RegExp(escaparRegex(q.trim()), "i");
       filtro.$or = [{ zona: re }, { region: re }, { periodo: re }, { sexo: re }, { "paciente.nombre": re }];
     }
-    //Al final se aplica el acceso para que nadie lo pueda saltar
+    //Al final se aplica el acceso para que nadie lo pueda saltar (IA)
     Object.assign(filtro, await filtroAcceso(req.usuario));
 
     const campoOrden = CAMPOS_ORDENABLES.includes(_sort) ? (_sort === "id" ? "_id" : _sort) : "fecha";

@@ -1,7 +1,7 @@
-//Checa el token y ve si se tardó en utilizarlo para que ya no funcione
+//Checa el token y ve si se tardó en utilizarlo para que ya no funcione (IA)
 import jwt from "jsonwebtoken";
 
-//Revisa que el usuario haya iniciado sesión
+//Revisa que el usuario haya iniciado sesión (IA)
 export function requiereLogin(req, res, next) {
   const [tipo, token] = (req.headers.authorization ?? "").split(" ");
 
@@ -17,7 +17,7 @@ export function requiereLogin(req, res, next) {
   }
 }
 
-//Revisa que el usuario tenga el rol que se necesita
+//Revisa que el usuario tenga el rol que se necesita (IA)
 export const requiereRol = (...roles) => (req, res, next) => {
   if (!roles.includes(req.usuario?.rol)) {
     return res.status(403).json({ error: "No tienes permiso para esta acción" });
