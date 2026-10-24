@@ -1,3 +1,4 @@
+//ESTE ARCHIVO FUE HECHO CON IA
 import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { Fila } from "./cdc";

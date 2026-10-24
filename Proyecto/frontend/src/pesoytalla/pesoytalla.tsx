@@ -664,6 +664,7 @@ export const PesoYTalla = () => {
             </Alert>
           )}
 
+ {/*LAS GRAFICAS FUERON HECHAS CON IA*/}
           {/* GRÁFICAS */}
 
           {!soloCaptura && evaluacion && (

@@ -1,3 +1,4 @@
+//ESTE ARCHIVO FUE HECHO CON IA
 //Calcula el estado nutricio con las tablas del CDC (de 2 a 20 años)
 import statageRaw from "./cdc/statage.csv?raw";
 import wtstatRaw from "./cdc/wtstat.csv?raw";
