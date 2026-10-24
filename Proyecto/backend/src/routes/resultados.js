@@ -3,7 +3,7 @@ import { Router } from "express";
 import { ObjectId } from "mongodb";
 import { getDb } from "../db.js";
 import { requiereRol } from "../middleware/auth.js";
-import { aCliente, escaparRegex, filtroAcceso, ROLES_QUE_EDITAN, exigirEbdiEstancia } from "./mediciones.js";
+import { aCliente, escaparRegex, filtroAcceso, ROLES_QUE_BORRAN, exigirEbdiEstancia } from "./mediciones.js";
 
 //Acomoda y estrae los resultados de la base de datos
 const FUENTES = {
@@ -98,7 +98,7 @@ export const rutasHistorial = rutaListado(({ fechaOrden, contenido, ...fila }) =
 }));
 
 //Borra un registro del historial: solo el admin
-rutasHistorial.delete("/:id", requiereRol(...ROLES_QUE_EDITAN), async (req, res) => {
+rutasHistorial.delete("/:id", requiereRol(...ROLES_QUE_BORRAN), async (req, res) => {
   const [tipo, idTexto] = req.params.id.split("-");
   if (!(tipo in FUENTES) || !ObjectId.isValid(idTexto)) {
     return res.status(404).json({ error: "No encontrado" });

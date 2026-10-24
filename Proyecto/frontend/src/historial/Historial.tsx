@@ -172,8 +172,9 @@ export const Historial = () => {
   const translate = useTranslate();
 
   const { permissions } = usePermissions();
-  //Solo el admin puede editar y borrar (el servidor también lo revisa)
-  const puedeEditar = permissions === "admin";
+  //Editar: admin y estancia (su EBDI). Borrar: solo el admin. El servidor también lo revisa
+  const puedeEditar = permissions === "admin" || permissions === "estancia";
+  const puedeBorrar = permissions === "admin";
 
   const filters = [
     <SearchInput
@@ -283,9 +284,9 @@ export const Historial = () => {
                   <Stack direction="row" spacing={1}>
                     <VerDetalles />
 
-                    {/* Editar y borrar: solo el admin */}
+                    {/* Editar: admin y estancia. Borrar: solo el admin */}
                     {puedeEditar && <EditarMedicion />}
-                    {puedeEditar && (
+                    {puedeBorrar && (
                       <DeleteButton
                         mutationMode="pessimistic"
                         redirect={false}
