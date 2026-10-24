@@ -1,4 +1,4 @@
-//Cambia la región de un coordinador npm run asignar-region -- USUARIO "REGION"
+//cambia la región de un coordinador npm run asignar-region -- USUARIO "REGION"
 import { conectar, desconectar } from "../src/db.js";
 import { REGIONES } from "../src/regiones.js";
 
