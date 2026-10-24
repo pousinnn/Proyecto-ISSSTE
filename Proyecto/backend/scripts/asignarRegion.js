@@ -1,10 +1,10 @@
-//cambia la región de un coordinador npm run asignar-region -- USUARIO "REGION"
+//cambia la region de un coordinador npm run asignar-region
 import { conectar, desconectar } from "../src/db.js";
 import { REGIONES } from "../src/regiones.js";
 
 const [usuario, region] = process.argv.slice(2);
 
-//Revisa que venga el usuario y una región válida
+//revisa que haya  usuario y una region valida
 if (!usuario || !region) {
   console.error('Uso: npm run asignar-region -- <usuario> "<región>"');
   process.exit(1);
@@ -14,7 +14,7 @@ if (!REGIONES.includes(region)) {
   process.exit(1);
 }
 
-//Busca al coordinador y le guarda la región
+//busca al coordinador y le guarda la regioon
 const db = await conectar();
 const cuenta = await db.collection("usuarios").findOne({ usuario });
 

@@ -1,4 +1,4 @@
-//Crea datos falsos para probar la app, con --borrar solo los borra
+//crea datos falsos para probar la app, con --borrar loss borra
 import { randomBytes } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import { conectar, desconectar } from "../src/db.js";
@@ -12,7 +12,7 @@ const COLECCIONES = ["usuarios", "infantes", "pesoytalla", "tallablanca", "perim
 
 const db = await conectar();
 
-//Borra los datos demo anteriores
+//borra los datos demo anteriores
 for (const c of COLECCIONES) {
   const { deletedCount } = await db.collection(c).deleteMany({ demo: true });
   if (deletedCount) console.log(`Borrados de ${c}: ${deletedCount}`);
@@ -23,7 +23,7 @@ if (soloBorrar) {
   process.exit(0);
 }
 
-//Números al azar que siempre salen iguales
+//numeros al azar que siempre salen iguales
 let semilla = 20261021;
 const azar = () => {
   semilla = (semilla + 0x6d2b79f5) | 0;
@@ -36,14 +36,14 @@ const entero = (min, max) => Math.floor(entre(min, max + 1));
 const uno = (lista) => lista[Math.floor(azar() * lista.length)];
 const r1 = (n) => Math.round(n * 10) / 10;
 
-//Nombres y apellidos para los datos falsos
+//nombres y apellidos para datos falsos
 const NINAS = ["Sofía", "Valentina", "Regina", "Camila", "Ximena", "María José", "Renata", "Victoria", "Natalia", "Isabella", "Fernanda", "Ana Paula"];
 const NINOS = ["Santiago", "Mateo", "Sebastián", "Leonardo", "Emiliano", "Diego", "Daniel", "Miguel Ángel", "Iker", "Gael", "José Luis", "Alejandro"];
 const APELLIDOS = ["Hernández", "García", "Martínez", "López", "González", "Pérez", "Rodríguez", "Sánchez", "Ramírez", "Cruz", "Flores", "Gómez", "Morales", "Vázquez", "Reyes", "Jiménez", "Torres", "Díaz", "Gutiérrez", "Ruiz", "Mendoza", "Aguilar", "Ortiz", "Castillo", "Núñez", "Peña"];
 const EBDIS = [3, 7, 12, 15, 21, 28, 34, 40];
 const ESTADOS_CURP = ["DF", "MC", "JC", "NL", "PL", "VZ", "GT", "YN"];
 
-//Crea un CURP falso con formato válido
+//crea un CURP con formato valido
 const ascii = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/Ñ/g, "X").replace(/[^A-Z]/g, "");
 const primeraVocalInterna = (s) => (ascii(s).slice(1).match(/[AEIOU]/) ?? ["X"])[0];
 const consonanteInterna = (s) => (ascii(s).slice(1).match(/[^AEIOU]/) ?? ["X"])[0];
@@ -63,7 +63,7 @@ function curp(nombre, paterno, materno, fnac, sexo) {
   return c;
 }
 
-//Talla, peso y cabeza aproximados según la edad
+//talla, peso y cabeza aproximados según la edad
 const tallaEsperada = (m) => (m <= 12 ? 50 + (25 * m) / 12 : m <= 24 ? 75 + (12 * (m - 12)) / 12 : 87 + (6.5 * (m - 24)) / 12);
 const pesoEsperado = (m) => (m <= 12 ? 3.3 + (6.7 * m) / 12 : m <= 24 ? 10 + (2.2 * (m - 12)) / 12 : 12.2 + (2 * (m - 24)) / 12);
 const cabezaEsperada = (m) => (m <= 12 ? 35 + (11 * m) / 12 : m <= 24 ? 46 + (2 * (m - 12)) / 12 : Math.min(52, 48 + (0.5 * (m - 24)) / 12));
@@ -73,7 +73,7 @@ const fechaUTC = (a, m, d) => new Date(Date.UTC(a, m - 1, d));
 const aTextoFecha = (f) => f.toISOString().slice(0, 10);
 const HOY = new Date();
 
-//Crea los infantes del padrón
+//crea los infantes del padron
 const TOTAL_INFANTES = 40;
 const CON_CUENTA = 12; // los primeros 12 tienen cuenta de paciente y mediciones
 const infantes = [];
@@ -92,7 +92,7 @@ for (let i = 0; i < TOTAL_INFANTES; i++) {
   const fBaja = deBaja ? new Date(Math.min(HOY.getTime() - 30 * 86400000, freg.getTime() + entero(200, 900) * 86400000)) : null;
   const ebdi = uno(EBDIS);
 
-  //Arma el infante con todos sus campos
+  // campos para chamaco
   const doc = {};
   for (const c of CAMPOS.ENTEROS) doc[c] = 0;
   for (const c of [...CAMPOS.FECHAS, ...CAMPOS.FECHA_HORA]) doc[c] = null;
@@ -127,7 +127,7 @@ for (let i = 0; i < TOTAL_INFANTES; i++) {
   doc.grupoDisc = doc.discapacidad ? uno(["Auditiva", "Visual", "Motriz", "Lenguaje"]) : "";
   doc.comentario = i % 9 === 0 ? "Registro de prueba generado automáticamente" : "";
 
-  //Inscrito desde el registro hasta la baja o hasta hoy
+  //inscrito desde el registro hasta  baja o hasta hoy
   doc.inscripciones = {};
   for (const mes of Object.values(COLUMNAS_MES)) {
     const [a, m] = mes.split("-").map(Number);
@@ -144,22 +144,22 @@ for (let i = 0; i < TOTAL_INFANTES; i++) {
 await db.collection("infantes").insertMany(infantes.map((x) => x.doc));
 console.log(`Infantes demo: ${infantes.length} (id_infante 900001 a ${900000 + infantes.length})`);
 
-//Crea las cuentas, todas con la misma contraseña
+//crea las cuentas en este caso todas con la misma contraseña
 const password = randomBytes(9).toString("base64url");
 const hash = await hashPassword(password);
 const usuarioDe = (x) =>
   `demo.${ascii(x.doc.nombre.split(" ")[0]).toLowerCase()}.${ascii(x.doc.paterno).toLowerCase()}`;
 
-//Un coordinador por cada región (solo consultan)
+//un coordinador por cada region
 const coordinadores = [
   { usuario: "demo.coord.norte", nombre: "Laura Méndez (coord. Norte)", rol: "coordinador", region: "Norte" },
   { usuario: "demo.coord.centronorte", nombre: "Raúl Ortega (coord. Centro Norte)", rol: "coordinador", region: "Centro Norte" },
   { usuario: "demo.coord.centro", nombre: "Patricia Vega (coord. Centro)", rol: "coordinador", region: "Centro" },
   { usuario: "demo.coord.sur", nombre: "Jorge Salinas (coord. Sur)", rol: "coordinador", region: "Sur" },
 ];
-//Un usuario de estancia por cada EBDI (capturan a sus niños)
+//Un usuario de estancia por cada EBDI (checar chamaco)
 const estancias = EBDIS.map((e) => ({ usuario: `demo.estancia.${e}`, nombre: `Estancia EBDI ${e}`, rol: "estancia", ebdi: e }));
-//Una cuenta de familia (papá, mamá o tutor) para los primeros infantes
+//una cuenta de familia (papa, mama o tutor) para los primeros infantes
 const familias = [];
 const usuariosUsados = new Set([...coordinadores, ...estancias].map((d) => d.usuario));
 for (const x of infantes.slice(0, CON_CUENTA)) {
@@ -175,13 +175,13 @@ for (const x of infantes.slice(0, CON_CUENTA)) {
   });
 }
 
-//Revisa que no se borren cuentas reales con el mismo nombre
+//revisa que no se borren cuentas reales con el mismo nombre
 const existentes = await db
   .collection("usuarios")
   .find({ usuario: { $in: [...usuariosUsados] }, demo: { $ne: true } })
   .toArray();
 if (existentes.length) {
-  console.error(`Ya existen cuentas reales con estos nombres: ${existentes.map((e) => e.usuario).join(", ")}`);
+  console.error(`ya existen cuentas reales con estos nombres: ${existentes.map((e) => e.usuario).join(", ")}`);
   process.exit(1);
 }
 
@@ -190,7 +190,7 @@ await db.collection("usuarios").insertMany(
 );
 console.log(`Cuentas demo: ${coordinadores.length} coordinadores + ${estancias.length} estancias + ${familias.length} familias`);
 
-//Crea las mediciones con las mismas validaciones de la api
+//crea las mediciones con las mismas validaciones de la desta api
 const CAPTURAS = [
   { periodo: "2026-1", fecha: fechaUTC(2026, 2, 16) },
   { periodo: "2026-1", fecha: fechaUTC(2026, 5, 11) },
@@ -201,7 +201,7 @@ const mediciones = { pesoytalla: [], tallablanca: [], perimetrocefalico: [] };
 for (const p of familias) {
   const { doc: inf, sexo, factor } = p.infante;
   const comunes = { sexo, region: inf.region, zona: `EBDI ${inf.ebdi}` };
-  //Las mediciones las captura la estancia del niño
+  //las mediciones las captura la estancia del niño
   const estancia = estancias.find((e) => e.ebdi === inf.ebdi);
   const meta = (fecha) => ({
     paciente: { usuario: p.usuario, nombre: p.nombre },
@@ -210,7 +210,7 @@ for (const p of familias) {
     demo: true,
   });
 
-  //Peso y talla y perímetro en cada captura
+  //peso y talla y perimetro en cada captura
   for (const { periodo, fecha } of CAPTURAS) {
     const meses = mesesEntre(inf.fnac, fecha);
     if (meses < 1) continue;
@@ -226,7 +226,7 @@ for (const p of familias) {
       peso: r1(enLibras ? kg / 0.45359237 : kg),
       unidadPeso: enLibras ? "lb" : "kg",
     });
-    //La edad es la del día de la medición
+    //la edad es la del dia de la medición
     datos.edadMeses = meses;
     datos.edad = `${Math.floor(meses / 12)} años y ${meses % 12} meses`;
     mediciones.pesoytalla.push({ ...datos, ...meta(fecha) });
@@ -242,7 +242,7 @@ for (const p of familias) {
     });
   }
 
-  //Talla blanco con la altura de los papás
+  //talla blanco con la altura de los papas
   const papa = r1(entre(160, 185));
   const mama = r1(entre(148, 170));
   mediciones.tallablanca.push({
@@ -258,13 +258,13 @@ for (const p of familias) {
   });
 }
 
-//Guarda las mediciones
+//guardamos las mediciones
 for (const [coleccion, docs] of Object.entries(mediciones)) {
   if (docs.length) await db.collection(coleccion).insertMany(docs);
   console.log(`Mediciones demo en ${coleccion}: ${docs.length}`);
 }
 
-//Guarda las cuentas en un archivo que no se sube a git
+//guardamos las cuentas en un archivo que no se displayea en git
 const lineas = [
   "Cuentas DEMO (datos falsos). NO subir a GitHub.",
   `Contraseña de todas las cuentas demo: ${password}`,
